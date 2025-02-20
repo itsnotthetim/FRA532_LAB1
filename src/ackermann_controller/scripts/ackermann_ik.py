@@ -11,7 +11,7 @@ class AckermannIKNode(Node):
         super().__init__('ackermann_ik_node')
         
         # Declare parameters
-        self.declare_parameter('wheelbase', 1.0)  # Distance between front and rear wheels
+        self.declare_parameter('wheelbase', 0.2)  # Distance between front and rear wheels
         self.declare_parameter('max_steering_angle', math.radians(30))  # Steering limits
         
         # Retrieve parameter values
