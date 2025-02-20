@@ -66,21 +66,21 @@ def generate_launch_description():
         package="controller_manager",
         executable="spawner",
         arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-        parameters=[{"use_sim_time": False}]
+        parameters=[{"use_sim_time": True}]
     )
 
     velocity_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["velocity_controllers", "--controller-manager", "/controller_manager"],
-        parameters=[{"use_sim_time": False}]
+        parameters=[{"use_sim_time": True}]
     )
 
     position_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["position_controllers", "--controller-manager", "/controller_manager"],
-        parameters=[{"use_sim_time": False}]
+        parameters=[{"use_sim_time": True}]
     )
 
     rviz = Node(
@@ -103,23 +103,23 @@ def generate_launch_description():
         )
     )
 
-    launch_description.add_action(
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=joint_state_broadcaster_spawner,
-                on_exit=[velocity_controller_spawner],
-            )
-        )
-    )
+    # launch_description.add_action(
+    #     RegisterEventHandler(
+    #         event_handler=OnProcessExit(
+    #             target_action=joint_state_broadcaster_spawner,
+    #             on_exit=[velocity_controller_spawner],
+    #         )
+    #     )
+    # )
 
-    launch_description.add_action(
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=velocity_controller_spawner,
-                on_exit=[position_controller_spawner],
-            )
-        )
-    )
+    # launch_description.add_action(
+    #     RegisterEventHandler(
+    #         event_handler=OnProcessExit(
+    #             target_action=velocity_controller_spawner,
+    #             on_exit=[position_controller_spawner],
+    #         )
+    #     )
+    # )
 
     # Add the rest of the nodes and launch descriptions
     launch_description.add_action(rviz)
