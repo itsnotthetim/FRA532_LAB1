@@ -24,7 +24,7 @@ def generate_launch_description():
                 os.path.join(
                     get_package_share_directory(package_name),
                     "launch",
-                    "display.launch.py"
+                    "rsp.launch.py"
                 )
             ]
         ),
@@ -40,7 +40,8 @@ def generate_launch_description():
                     "gazebo.launch.py"
                 )
             ]
-        )
+        ),
+        # launch_arguments={"world": os.path.join(get_package_share_directory(package_name), "worlds", "basic.world")}.items()
     )
 
     spawn_entity = Node(
@@ -48,7 +49,10 @@ def generate_launch_description():
         executable="spawn_entity.py",
         arguments=[
             "-topic", "robot_description",
-            "-entity", "ackbot"
+            "-entity", "ackbot",
+            "-x", "0",
+            "-y", "0",
+            "-z", "0.5"
         ],
         output = "screen"
     )
@@ -69,6 +73,13 @@ def generate_launch_description():
         package="controller_manager",
         executable="spawner",
         arguments=["velocity_controllers", "--controller-manager", "/controller_manager"],
+        parameters=[{"use_sim_time": False}]
+    )
+
+    position_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["position_controllers", "--controller-manager", "/controller_manager"],
         parameters=[{"use_sim_time": False}]
     )
 
@@ -97,6 +108,15 @@ def generate_launch_description():
             event_handler=OnProcessExit(
                 target_action=joint_state_broadcaster_spawner,
                 on_exit=[velocity_controller_spawner],
+            )
+        )
+    )
+
+    launch_description.add_action(
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=velocity_controller_spawner,
+                on_exit=[position_controller_spawner],
             )
         )
     )

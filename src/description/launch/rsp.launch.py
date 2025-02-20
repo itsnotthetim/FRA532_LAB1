@@ -30,11 +30,11 @@ def generate_launch_description():
         parameters=[params]
     )
 
-    # node_joint_state_publisher_gui = Node(
-    #     package='joint_state_publisher_gui',
-    #     executable='joint_state_publisher_gui',
-    #     output='screen'
-    # )
+    node_joint_state_publisher_gui = Node(
+        package='joint_state_publisher_gui',
+        executable='joint_state_publisher_gui',
+        output='screen'
+    )
 
     node_rviz = Node(
         package='rviz2',
@@ -52,5 +52,5 @@ def generate_launch_description():
 
         node_robot_state_publisher,
         # node_joint_state_publisher_gui,
-        node_rviz
+        # node_rviz
     ])

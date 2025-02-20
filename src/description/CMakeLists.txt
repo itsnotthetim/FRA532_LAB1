@@ -29,6 +29,7 @@ install(DIRECTORY
   models
   meshes
   worlds
+  config
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
