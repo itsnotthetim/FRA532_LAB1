@@ -57,11 +57,6 @@ def generate_launch_description():
         output = "screen"
     )
     
-    controller = Node(
-    	package="my_controller",
-    	executable="diff_drive.py"
-    )
-    
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -69,19 +64,19 @@ def generate_launch_description():
         parameters=[{"use_sim_time": True}]
     )
 
-    velocity_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["velocity_controllers", "--controller-manager", "/controller_manager"],
-        parameters=[{"use_sim_time": True}]
-    )
+    # velocity_controller_spawner = Node(
+    #     package="controller_manager",
+    #     executable="spawner",
+    #     arguments=["velocity_controllers", "--controller-manager", "/controller_manager"],
+    #     parameters=[{"use_sim_time": True}]
+    # )
 
-    position_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["position_controllers", "--controller-manager", "/controller_manager"],
-        parameters=[{"use_sim_time": True}]
-    )
+    # position_controller_spawner = Node(
+    #     package="controller_manager",
+    #     executable="spawner",
+    #     arguments=["position_controllers", "--controller-manager", "/controller_manager"],
+    #     parameters=[{"use_sim_time": True}]
+    # )
 
     rviz = Node(
         package="rviz2",

@@ -16,6 +16,7 @@ position_controller:
     use_sim_time: true
     joints: 
       - virtual_front_wheel_joint
+    interface_name: position
     command_interface: 
       - position
     state_interface: 
@@ -28,6 +29,7 @@ velocity_controllers:
     use_sim_time: true
     joints: 
       - virtual_rear_wheel_joint
+    interface_name: velocity
     command_interface: 
       - velocity
     state_interface: 
