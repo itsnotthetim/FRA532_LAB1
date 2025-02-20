@@ -26,7 +26,7 @@ class AckermannFKWheelOdometry(Node):
         
         # Subscribe to wheel velocities (JointState message)
         self.wheel_subscriber = self.create_subscription(
-            JointState, '/wheel_states', self.wheel_callback, 10)
+            JointState, '/joint_states', self.wheel_callback, 10)
         
         # Publisher for odometry
         self.odom_publisher = self.create_publisher(Odometry, '/odom', 10)
