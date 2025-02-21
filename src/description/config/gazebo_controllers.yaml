@@ -8,7 +8,7 @@ controller_manager:
     position_controller:
       type: position_controllers/JointGroupPositionController
 
-    velocity_controllers:
+    velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
 
 position_controller:
@@ -24,7 +24,7 @@ position_controller:
       - velocity
       - effort
 
-velocity_controllers:
+velocity_controller:
   ros__parameters:
     use_sim_time: true
     joints: 
