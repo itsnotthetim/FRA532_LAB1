@@ -72,23 +72,29 @@ class PIDControllerNode(Node):
         
         # Declare parameters
         self.declare_parameter('rate', 100)
-        self.declare_parameter('position_Kp', 1.0)
-        self.declare_parameter('position_Ki', 0.0)
-        self.declare_parameter('position_Kd', 0.0)
-        self.declare_parameter('orientation_Kp', 1.0)
-        self.declare_parameter('orientation_Ki', 0.0)
-        self.declare_parameter('orientation_Kd', 0.0)
+        self.declare_parameter('x_Kp', 1.0)
+        self.declare_parameter('x_Ki', 0.0)
+        self.declare_parameter('x_Kd', 0.0)
+        self.declare_parameter('y_Kp', 1.0)
+        self.declare_parameter('y_Ki', 0.0)
+        self.declare_parameter('y_Kd', 0.0)
+        self.declare_parameter('yaw_Kp', 1.0)
+        self.declare_parameter('yaw_Ki', 0.0)
+        self.declare_parameter('yaw_Kd', 0.0)
 
         # Rate
         self.rate = self.get_parameter('rate').value
 
         # PID parameters
-        self.position_Kp = self.get_parameter('position_Kp').value
-        self.position_Ki = self.get_parameter('position_Ki').value
-        self.position_Kd = self.get_parameter('position_Kd').value
-        self.orientation_Kp = self.get_parameter('orientation_Kp').value
-        self.orientation_Ki = self.get_parameter('orientation_Ki').value
-        self.orientation_Kd = self.get_parameter('orientation_Kd').value
+        self.x_Kp = self.get_parameter('x_Kp').value
+        self.x_Ki = self.get_parameter('x_Ki').value
+        self.x_Kd = self.get_parameter('x_Kd').value
+        self.y_Kp = self.get_parameter('y_Kp').value
+        self.y_Ki = self.get_parameter('y_Ki').value
+        self.y_Kd = self.get_parameter('y_Kd').value
+        self.yaw_Kp = self.get_parameter('yaw_Kp').value
+        self.yaw_Ki = self.get_parameter('yaw_Ki').value
+        self.yaw_Kd = self.get_parameter('yaw_Kd').value
 
         # Set points
         with open('//yaml/path.yaml', 'r') as f:
@@ -104,8 +110,9 @@ class PIDControllerNode(Node):
         self.odom = odom()
 
         # Create PID controllers
-        self.position_pid = PIDController(self.position_Kp, self.position_Ki, self.position_Kd, 0, 1/self.rate, 0)
-        self.orientation_pid = PIDController(self.orientation_Kp, self.orientation_Ki, self.orientation_Kd, 0, 1/self.rate, 0)
+        self.x_pid = PIDController(self.x_Kp, self.x_Ki, self.x_Kd, 0, 1/self.rate, 0)
+        self.y_pid = PIDController(self.y_Kp, self.y_Ki, self.y_Kd, 0, 1/self.rate, 0)
+        self.yaw_pid = PIDController(self.yaw_Kp, self.yaw_Ki, self.yaw_Kd, 0, 1/self.rate, 0)
 
         # Publish cmd_vel
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
