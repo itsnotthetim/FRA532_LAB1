@@ -21,7 +21,7 @@ find_package(ament_cmake REQUIRED)		# cpp (optional)
 
 
 ################ INSTALL LAUNCH, ETC #################
-install(DIRECTORY launch config description
+install(DIRECTORY launch description
   # add directories here
   DESTINATION share/${PROJECT_NAME})
 

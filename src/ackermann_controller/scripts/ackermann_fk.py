@@ -51,10 +51,10 @@ class AckermannFKWheelOdometry(Node):
         
         # Compute velocity and yaw rate
         v = (v_left + v_right) / 2.0
-        omega = (v_right - v_left) / self.track_width
+    
         
         if self.kinematic_model == 'yaw_rate':
-            pass  # Keep omega as is
+            omega = self.yaw # Sub from IMU
         elif self.kinematic_model == 'single_track':
             steering_angle = math.atan2(self.wheelbase * omega, v) if abs(v) > 0.001 else 0.0
             omega = v * math.tan(steering_angle) / self.wheelbase

@@ -3,7 +3,8 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from ackermann_msgs.msg import AckermannDriveStamped
+from std_msgs.msg import Float64MultiArray
+
 import math
 
 class AckermannIKNode(Node):
@@ -11,46 +12,71 @@ class AckermannIKNode(Node):
         super().__init__('ackermann_ik_node')
         
         # Declare parameters
-        self.declare_parameter('wheelbase', 0.2)  # Distance between front and rear wheels
-        self.declare_parameter('max_steering_angle', math.radians(30))  # Steering limits
+        self.declare_parameter('wheel_base', 0.2)  # WB: Distance between front and rear axles
+        self.declare_parameter('wheel_radius', 0.045)  # WB: Distance between front and rear axles
+        self.declare_parameter('track_width', 0.14)  # TW: Distance between left and right wheels
+        self.declare_parameter('steering_ratio', 1.0)  # γ: Steering ratio
+        self.declare_parameter('model', 'bicycle') # Model selection: bicycle, ackermann
+
+        # Get parameter values
+        self.WB = self.get_parameter('wheel_base').value
+        self.wheel_radius = self.get_parameter('wheel_radius').value
+        self.TW = self.get_parameter('track_width').value
+        self.gamma = self.get_parameter('steering_ratio').value
+        self.model = self.get_parameter('model').value
         
-        # Retrieve parameter values
-        self.wheelbase = self.get_parameter('wheelbase').value
-        self.max_steering_angle = self.get_parameter('max_steering_angle').value
-        
+        self.linear_velocity = 0.0  # Linear velocity v
+        self.angular_velocity = 0.0  # Angular velocity Ωz
+
+
+        # Publish Velocity to Wheels
+        self.rear_wheel_publisher = self.create_publisher(Float64MultiArray, '/velocity_controller/commands', 10)
+        self.front_wheel_publisher = self.create_publisher(Float64MultiArray, '/position_controller/commands', 10)
+
         # Subscribe to cmd_vel topic
         self.cmd_vel_subscriber = self.create_subscription(
             Twist, '/cmd_vel', self.cmd_vel_callback, 10)
         
-        # Publisher for Ackermann drive
-        self.ackermann_publisher = self.create_publisher(
-            AckermannDriveStamped, '/ackermann_cmd', 10)
-        
-        self.get_logger().info("Ackermann IK Node Initialized")
+       
     
     def cmd_vel_callback(self, msg: Twist):
-        linear_velocity = msg.linear.x  # Forward velocity (m/s)
-        angular_velocity = msg.angular.z  # Rotation velocity (rad/s)
+        self.linear_velocity = msg.linear.x  # Forward velocity (m/s)
+        self.angular_velocity = msg.angular.z  # Rotation velocity (rad/s)
 
-        # Compute steering angle using bicycle model formula with No-Slip Condition
-        if abs(linear_velocity) > 0.001:
-            turning_radius = linear_velocity / angular_velocity if abs(angular_velocity) > 0.001 else float('inf')
-            steering_angle = math.atan2(self.wheelbase, turning_radius)
+
+
+        if self.linear_velocity != 0.0:
+            delta = math.atan((self.L * self.angular_velocity) / self.linear_velocity)
+
+            delta_Ack = delta / self.gamma
+            delta_L = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB - 0.5 * self.TW * math.tan(delta_Ack)))
+            delta_R = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB + 0.5 * self.TW * math.tan(delta_Ack)))
+        
         else:
-            steering_angle = 0.0
-        
-        # Clamp the steering angle within limits
-        steering_angle = max(-self.max_steering_angle, min(self.max_steering_angle, steering_angle))
-        
-        # Create Ackermann message
-        ackermann_msg = AckermannDriveStamped()
-        ackermann_msg.drive.speed = linear_velocity
-        ackermann_msg.drive.steering_angle = steering_angle
-        
-        # Publish Ackermann command
-        self.ackermann_publisher.publish(ackermann_msg)
-        self.get_logger().info(f"Published Ackermann: Speed={linear_velocity:.2f} m/s, Steering={math.degrees(steering_angle):.2f}°")
+            delta = 0.0
+            delta_Ack = 0.0
+            delta_L = 0.0
+            delta_R = 0.0
 
+        
+        if self.model == 'bicycle':
+            steering_angle_left_wheel = delta
+            steering_angle_right_wheel = delta
+        elif self.model == 'ackermann':
+            steering_angle_left_wheel = delta_L
+            steering_angle_right_wheel = delta_R
+
+        speed_rear_wheel = self.linear_velocity / self.wheel_radius
+
+        front_wheel_msg = Float64MultiArray()
+        front_wheel_msg.data = [steering_angle_left_wheel,steering_angle_right_wheel]
+        self.front_wheel_publisher.publish(front_wheel_msg)
+
+        rear_wheel_msg = Float64MultiArray()
+        rear_wheel_msg.data = [speed_rear_wheel, speed_rear_wheel]
+        self.rear_wheel_publisher.publish(rear_wheel_msg)
+
+    
 
 def main(args=None):
     rclpy.init(args=args)
