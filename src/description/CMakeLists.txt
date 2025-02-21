@@ -21,8 +21,16 @@ find_package(ament_cmake REQUIRED)		# cpp (optional)
 
 
 ################ INSTALL LAUNCH, ETC #################
-install(DIRECTORY launch description
+install(DIRECTORY
   # add directories here
+  launch
+  rviz
+  description
+  models
+  meshes
+  worlds
+  config
+  # urdf
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
