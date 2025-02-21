@@ -19,11 +19,11 @@
         <transmission name="${wheel_prefix}_wheel_trans" type="SimpleTransmission">
             <type>transmission_interface/SimpleTransmission</type>
             <actuator name="${wheel_prefix}_wheel_motor">
-                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
             <joint name="${wheel_prefix}_wheel">
-                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
         </transmission>
     </xacro:macro>
