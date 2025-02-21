@@ -5,8 +5,9 @@ from rclpy.node import Node
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import JointState, Imu
 from geometry_msgs.msg import Quaternion, Twist, TransformStamped
+from gazebo_msgs.msg import ModelStates
 import math
-import tf_transformations
+import tf_transformations 
 from tf2_ros import TransformBroadcaster
 
 class AckermannFKWheelOdometry(Node):
@@ -19,7 +20,7 @@ class AckermannFKWheelOdometry(Node):
         self.declare_parameter('wheelbase', 0.2)  # Distance between front and rear axles
         self.declare_parameter('track_width', 0.14)  # Distance between left and right wheels
         self.declare_parameter('wheel_radius', 0.045)  # Radius of the wheels
-        self.declare_parameter('kinematic_model', 'double_track')  # Model selection: yaw_rate, single_track, double_track
+        self.declare_parameter('kinematic_model', 'ground_truth')  # Model selection: yaw_rate, single_track, double_track
         
         # Retrieve parameter values
         self.wheelbase = self.get_parameter('wheelbase').value
@@ -32,6 +33,7 @@ class AckermannFKWheelOdometry(Node):
             JointState, '/joint_states', self.wheel_callback, 10)
         
         self.imu_subscriber = self.create_subscription(Imu, '/imu_plugin/out', self.imu_callback, 10)
+        self.imu_subscriber = self.create_subscription(ModelStates, '/gazebo/model_states', self.ground_truth_callback, 10)
         
         
         # Publisher for odometry
@@ -41,6 +43,8 @@ class AckermannFKWheelOdometry(Node):
         
         self.tf_broadcaster = TransformBroadcaster(self)
         self.odom = [0, 0, 0, 0, 0, 0]
+        self.odom_ground_truth = [0, 0, 0, 0, 0, 0]
+
         self.quaternion = [0, 0, 0, 0]
         self.rear_vel = [0.0, 0.0]
         self.delta = 0.0
@@ -54,22 +58,24 @@ class AckermannFKWheelOdometry(Node):
 
 
     def odom_pub(self, odom):
+
+
         odom_msg = Odometry()
         odom_msg.header.stamp = self.get_clock().now().to_msg()
         odom_msg.header.frame_id = "odom"
         odom_msg.child_frame_id = "base_footprint"
-        odom_msg.pose.pose.position.x = odom[0]
-        odom_msg.pose.pose.position.y = odom[1]
+        odom_msg.pose.pose.position.x = float(odom[0])
+        odom_msg.pose.pose.position.y = float(odom[1])
         odom_msg.pose.pose.position.z = 0.0
 
-        quaternion = tf_transformations.quaternion_from_euler(0, 0, odom[2])
+        quaternion = tf_transformations.quaternion_from_euler(0, 0, float(odom[2]))
         odom_msg.pose.pose.orientation.x = quaternion[0]
         odom_msg.pose.pose.orientation.y = quaternion[1]
         odom_msg.pose.pose.orientation.z = quaternion[2]
         odom_msg.pose.pose.orientation.w = quaternion[3]
 
-        odom_msg.twist.twist.linear.x = odom[4]
-        odom_msg.twist.twist.angular.z = odom[5]
+        odom_msg.twist.twist.linear.x = float(odom[4])
+        odom_msg.twist.twist.angular.z = float(odom[5])
 
         self.odom_publisher.publish(odom_msg)
 
@@ -78,8 +84,8 @@ class AckermannFKWheelOdometry(Node):
         tfs.header.frame_id = "odom"
         tfs.child_frame_id = "base_footprint"
 
-        tfs.transform.translation.x = odom[0]
-        tfs.transform.translation.y = odom[1]
+        tfs.transform.translation.x = float(odom[0])
+        tfs.transform.translation.y = float(odom[1])
         tfs.transform.translation.z = 0.0
         tfs.transform.rotation.x = quaternion[0]
         tfs.transform.rotation.y = quaternion[1]
@@ -102,8 +108,12 @@ class AckermannFKWheelOdometry(Node):
         elif(self.kinematic_model == 'yaw_rate'):
             self.update_state_space[5] = self.yaw
 
-        self.odom = self.update_state_space
-        self.odom_pub(self.odom)
+        if self.kinematic_model != 'ground_truth':
+            self.odom = self.update_state_space
+            self.odom_pub(self.odom)
+        else:
+            self.odom = self.odom_ground_truth
+            self.odom_pub(self.odom_ground_truth)
 
     def wheel_callback(self, msg: JointState):
 
@@ -128,6 +138,24 @@ class AckermannFKWheelOdometry(Node):
     
     def imu_callback(self, msg: Imu):
         self.yaw = msg.angular_velocity.z
+    
+    def ground_truth_callback(self, msg: ModelStates):
+        index = msg.name.index("ackbot")
+        self.posX = msg.pose[index].position.x
+        self.posY = msg.pose[index].position.y
+        self.posZ = msg.pose[index].position.z
+
+        self.q1 = msg.pose[index].orientation.x
+        self.q2 = msg.pose[index].orientation.y
+        self.q3 = msg.pose[index].orientation.z
+        self.q4 = msg.pose[index].orientation.w
+        self.euler = tf_transformations.euler_from_quaternion([self.q1, self.q2, self.q3, self.q4])
+        self.yaw_ground_truth = self.euler[2]
+
+        self.linX = msg.twist[index].linear.x
+        self.angZ = msg.twist[index].angular.z
+        self.odom_ground_truth = [self.posX, self.posY, self.yaw_ground_truth, 0 ,self.linX, self.angZ]
+
         
 def main(args=None):
     rclpy.init(args=args)
