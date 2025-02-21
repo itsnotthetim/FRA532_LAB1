@@ -16,7 +16,7 @@ class AckermannIKNode(Node):
         self.declare_parameter('wheel_radius', 0.045)  # WB: Distance between front and rear axles
         self.declare_parameter('track_width', 0.14)  # TW: Distance between left and right wheels
         self.declare_parameter('steering_ratio', 1.0)  # γ: Steering ratio
-        self.declare_parameter('model', 'bicycle') # Model selection: bicycle, ackermann
+        self.declare_parameter('model', 'ackermann') # Model selection: bicycle, ackermann
 
         # Get parameter values
         self.WB = self.get_parameter('wheel_base').value
@@ -30,8 +30,8 @@ class AckermannIKNode(Node):
 
 
         # Publish Velocity to Wheels
-        self.rear_wheel_publisher = self.create_publisher(Float64MultiArray, '/velocity_controller/commands', 10)
-        self.front_wheel_publisher = self.create_publisher(Float64MultiArray, '/position_controller/commands', 10)
+        self.rear_wheel_publisher = self.create_publisher(Float64MultiArray, '/forward_velocity_controllers/commands', 10)
+        self.front_wheel_publisher = self.create_publisher(Float64MultiArray, '/forward_position_controllers/commands', 10)
 
         # Subscribe to cmd_vel topic
         self.cmd_vel_subscriber = self.create_subscription(
@@ -46,7 +46,7 @@ class AckermannIKNode(Node):
 
 
         if self.linear_velocity != 0.0:
-            delta = math.atan((self.L * self.angular_velocity) / self.linear_velocity)
+            delta = math.atan((self.WB * self.angular_velocity) / self.linear_velocity)
 
             delta_Ack = delta / self.gamma
             delta_L = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB - 0.5 * self.TW * math.tan(delta_Ack)))
@@ -69,7 +69,7 @@ class AckermannIKNode(Node):
         speed_rear_wheel = self.linear_velocity / self.wheel_radius
 
         front_wheel_msg = Float64MultiArray()
-        front_wheel_msg.data = [steering_angle_left_wheel,steering_angle_right_wheel]
+        front_wheel_msg.data = [steering_angle_left_wheel, steering_angle_right_wheel]
         self.front_wheel_publisher.publish(front_wheel_msg)
 
         rear_wheel_msg = Float64MultiArray()

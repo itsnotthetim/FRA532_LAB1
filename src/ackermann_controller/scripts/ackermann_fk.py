@@ -4,9 +4,10 @@ import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import JointState, Imu
-from geometry_msgs.msg import Quaternion, Twist
+from geometry_msgs.msg import Quaternion, Twist, TransformStamped
 import math
 import tf_transformations
+from tf2_ros import TransformBroadcaster
 
 class AckermannFKWheelOdometry(Node):
     def __init__(self):
@@ -18,7 +19,7 @@ class AckermannFKWheelOdometry(Node):
         self.declare_parameter('wheelbase', 0.2)  # Distance between front and rear axles
         self.declare_parameter('track_width', 0.14)  # Distance between left and right wheels
         self.declare_parameter('wheel_radius', 0.045)  # Radius of the wheels
-        self.declare_parameter('kinematic_model', 'single_track')  # Model selection: yaw_rate, single_track, double_track
+        self.declare_parameter('kinematic_model', 'double_track')  # Model selection: yaw_rate, single_track, double_track
         
         # Retrieve parameter values
         self.wheelbase = self.get_parameter('wheelbase').value
@@ -30,7 +31,7 @@ class AckermannFKWheelOdometry(Node):
         self.wheel_subscriber = self.create_subscription(
             JointState, '/joint_states', self.wheel_callback, 10)
         
-        self.imu_subscriber = self.create_subscription(Imu, '/imu', self.imu_callback, 10)
+        self.imu_subscriber = self.create_subscription(Imu, '/imu_plugin/out', self.imu_callback, 10)
         
         
         # Publisher for odometry
@@ -38,51 +39,71 @@ class AckermannFKWheelOdometry(Node):
         
         self.create_timer(self.dt, self.timer_callback)
         
+        self.tf_broadcaster = TransformBroadcaster(self)
         self.odom = [0, 0, 0, 0, 0, 0]
-        self.update_state_space = [0, 0, 0, 0, 0, 0]
         self.quaternion = [0, 0, 0, 0]
         self.rear_vel = [0.0, 0.0]
         self.delta = 0.0
+        self.yaw = 0.0
         self.get_logger().info("Ackermann FK Wheel Odometry Node Initialized")
 
     def timer_callback(self):
         self.state_space()
-        self.odom = self.update_state_space
-        self.odom_pub()
+        print(self.odom) 
+        
 
-    def odom_pub(self):
+
+    def odom_pub(self, odom):
         odom_msg = Odometry()
         odom_msg.header.stamp = self.get_clock().now().to_msg()
         odom_msg.header.frame_id = "odom"
-        odom_msg.child_frame_id = "base_link"
-        odom_msg.pose.pose.position.x = self.odom[0]
-        odom_msg.pose.pose.position.y = self.odom[1]
+        odom_msg.child_frame_id = "base_footprint"
+        odom_msg.pose.pose.position.x = odom[0]
+        odom_msg.pose.pose.position.y = odom[1]
         odom_msg.pose.pose.position.z = 0.0
 
-        odom_msg.pose.pose.orientation.x = self.quaternion[0]
-        odom_msg.pose.pose.orientation.y = self.quaternion[1]
-        odom_msg.pose.pose.orientation.z = self.quaternion[2]
-        odom_msg.pose.pose.orientation.w = self.quaternion[3]
+        quaternion = tf_transformations.quaternion_from_euler(0, 0, odom[2])
+        odom_msg.pose.pose.orientation.x = quaternion[0]
+        odom_msg.pose.pose.orientation.y = quaternion[1]
+        odom_msg.pose.pose.orientation.z = quaternion[2]
+        odom_msg.pose.pose.orientation.w = quaternion[3]
 
-        odom_msg.twist.twist.linear.x = self.odom[4]
-        odom_msg.twist.twist.angular.z = self.odom[5]
+        odom_msg.twist.twist.linear.x = odom[4]
+        odom_msg.twist.twist.angular.z = odom[5]
 
         self.odom_publisher.publish(odom_msg)
+
+        tfs = TransformStamped()
+        tfs.header.stamp = self.get_clock().now().to_msg()
+        tfs.header.frame_id = "odom"
+        tfs.child_frame_id = "base_footprint"
+
+        tfs.transform.translation.x = odom[0]
+        tfs.transform.translation.y = odom[1]
+        tfs.transform.translation.z = 0.0
+        tfs.transform.rotation.x = quaternion[0]
+        tfs.transform.rotation.y = quaternion[1]
+        tfs.transform.rotation.z = quaternion[2]
+        tfs.transform.rotation.w = quaternion[3]
+    
+        self.tf_broadcaster.sendTransform(tfs)
         
     def state_space(self):
         self.update_state_space = [0, 0, 0, 0, 0, 0]
-        self.update_state_space[0] = self.odom[0] + self.odom[1] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
+        self.update_state_space[0] = self.odom[0] + self.odom[4] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
         self.update_state_space[1] = self.odom[1] + self.odom[4] * self.dt * math.sin(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
         self.update_state_space[2] = self.odom[2] + self.odom[5] * self.dt
-        self.quaternion = tf_transformations.quaternion_from_euler(0, 0, self.odom[2])
         self.update_state_space[4] = (self.rear_vel[0] + self.rear_vel[1]) / 2
 
         if(self.kinematic_model == 'single_track'):
-            self.update_state_space[5] = self.odom[4]/self.wheelbase * math.tan(self.delta)
+            self.update_state_space[5] = (self.odom[4]/self.wheelbase) * math.tan(self.delta)
         elif(self.kinematic_model == 'double_track'):
             self.update_state_space[5] = (self.rear_vel[1] - self.rear_vel[0]) / self.track_width
         elif(self.kinematic_model == 'yaw_rate'):
-            self.update_state_space[5] = self.odom[5]
+            self.update_state_space[5] = self.yaw
+
+        self.odom = self.update_state_space
+        self.odom_pub(self.odom)
 
     def wheel_callback(self, msg: JointState):
 
@@ -93,8 +114,8 @@ class AckermannFKWheelOdometry(Node):
         indices = {name: i for i, name in enumerate(msg.name)}
 
         # Assign values if they exist in the message
-        index_fl = indices.get("front_left_wheel")
-        index_fr = indices.get("front_right_wheel")
+        index_fl = indices.get("left_steering_hinge_wheel")
+        index_fr = indices.get("right_steering_hinge_wheel")
         index_l = indices.get("rear_left_wheel")
         index_r = indices.get("rear_right_wheel")
 
@@ -106,7 +127,7 @@ class AckermannFKWheelOdometry(Node):
             self.delta = (msg.position[index_fr] + msg.position[index_fl]) / 2
     
     def imu_callback(self, msg: Imu):
-        self.delta = msg.angular_velocity.z
+        self.yaw = msg.angular_velocity.z
         
 def main(args=None):
     rclpy.init(args=args)
