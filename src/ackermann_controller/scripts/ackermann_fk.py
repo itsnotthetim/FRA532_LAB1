@@ -49,7 +49,7 @@ class AckermannFKWheelOdometry(Node):
 
     def timer_callback(self):
         self.state_space()
-        print(self.odom) 
+        # print(self.odom) 
         
 
 
