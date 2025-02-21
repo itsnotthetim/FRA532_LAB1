@@ -7,6 +7,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription, RegisterEventHandler, ExecuteProcess
 from launch.event_handlers import OnProcessExit
+import launch_ros.actions
 import xacro
 
 def generate_launch_description():
@@ -118,9 +119,18 @@ def generate_launch_description():
         )
     )
 
+    # Static Transform Publisher (world -> odom)
+    static_tf = launch_ros.actions.Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        arguments=["0", "0", "0", "0", "0", "0", "world", "odom"],
+        output="screen"
+    )
+
     # Add the rest of the nodes and launch descriptions
     # launch_description.add_action(rviz)
     launch_description.add_action(gazebo)
     launch_description.add_action(spawn_entity)
     launch_description.add_action(rsp)
+    launch_description.add_action(static_tf)
     return launch_description
