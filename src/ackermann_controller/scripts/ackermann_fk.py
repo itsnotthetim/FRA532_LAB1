@@ -36,13 +36,16 @@ class AckermannFKWheelOdometry(Node):
         self.create_timer(self.dt, self.timer_callback)
         
         self.odom = [0, 0, 0, 0, 0, 0]
+        self.update_state_space = [0, 0, 0, 0, 0, 0]
+        self.quaternion = [0, 0, 0, 0]
         self.rear_vel = [0.0, 0.0]
+        self.delta = 0.0
         self.get_logger().info("Ackermann FK Wheel Odometry Node Initialized")
 
     def timer_callback(self):
         self.state_space()
         self.odom = self.update_state_space
-        self.odom_publisher()
+        self.odom_pub()
 
     def wheel_callback(self, msg: JointState):
 
@@ -60,12 +63,12 @@ class AckermannFKWheelOdometry(Node):
 
         # Compute velocities and steering angles only if indices are found
         if index_l is not None and index_r is not None:
-            self.vel_rear = [msg.velocity[index_r] * self.wheel_radius, msg.velocity[index_l] * self.wheel_radius]
+            self.rear_vel = [msg.velocity[index_r] * self.wheel_radius, msg.velocity[index_l] * self.wheel_radius]
 
         if index_fl is not None and index_fr is not None:
             self.delta = (msg.position[index_fr] + msg.position[index_fl]) / 2
 
-    def odom_publisher(self):
+    def odom_pub(self):
         odom_msg = Odometry()
         odom_msg.header.stamp = self.get_clock().now().to_msg()
         odom_msg.header.frame_id = "odom"
@@ -73,9 +76,15 @@ class AckermannFKWheelOdometry(Node):
         odom_msg.pose.pose.position.x = self.odom[0]
         odom_msg.pose.pose.position.y = self.odom[1]
         odom_msg.pose.pose.position.z = 0.0
-        odom_msg.pose.pose.orientation = Quaternion(*self.quaternion)
+
+        odom_msg.pose.pose.orientation.x = self.quaternion[0]
+        odom_msg.pose.pose.orientation.y = self.quaternion[1]
+        odom_msg.pose.pose.orientation.z = self.quaternion[2]
+        odom_msg.pose.pose.orientation.w = self.quaternion[3]
+
         odom_msg.twist.twist.linear.x = self.odom[4]
         odom_msg.twist.twist.angular.z = self.odom[5]
+        
         self.odom_publisher.publish(odom_msg)
         
     def state_space(self):
