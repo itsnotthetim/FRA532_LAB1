@@ -49,6 +49,9 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-entity", "ackbot",
+            "-x", "9.073496746393584",
+            "-y", "-0.00005465073750971568",
+            "-Y", "1.5700039414375448"
         ],
         output = "screen"
     )
