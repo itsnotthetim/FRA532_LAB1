@@ -2,6 +2,7 @@
 <robot name="limo_ackerman" xmlns:xacro="http://ros.org/wiki/xacro">
     <xacro:include filename="$(find ack_description)/description/limo_gazebo.gazebo" />
 
+
     <!-- Actuator configurations -->
     <xacro:limo_wheel_transmission wheel_prefix="front_right" />
     <xacro:limo_wheel_transmission wheel_prefix="front_left" />
@@ -13,6 +14,18 @@
     <xacro:gazebo_laser frame_prefix="laser" />
     <xacro:gazebo_depth_camera frame_prefix="depth_camera" />
     <xacro:gazebo_imu frame_prefix="imu" />
+
+    <gazebo>
+      <plugin name="ground_truth_plugin" filename="libgazebo_ros_p3d.so">
+        <ros>
+          <namespace>/ground_truth</namespace>
+          <remapping>odom:=pose</remapping>
+        </ros>
+        <body_name>base_link</body_name>
+        <frameName>world</frameName>
+        <updateRate>100.0</updateRate>
+      </plugin>
+    </gazebo>
 
     <gazebo>
         <mu1 value="10"/>
