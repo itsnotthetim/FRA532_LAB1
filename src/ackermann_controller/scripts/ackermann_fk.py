@@ -40,8 +40,9 @@ class AckermannFKWheelOdometry(Node):
         self.get_logger().info("Ackermann FK Wheel Odometry Node Initialized")
 
     def timer_callback(self):
-
-        pass
+        self.state_space()
+        self.odom = self.update_state_space
+        self.odom_publisher()
 
     def wheel_callback(self, msg: JointState):
 
@@ -64,37 +65,33 @@ class AckermannFKWheelOdometry(Node):
         if index_fl is not None and index_fr is not None:
             self.delta = (msg.position[index_fr] + msg.position[index_fl]) / 2
 
-
+    def odom_publisher(self):
+        odom_msg = Odometry()
+        odom_msg.header.stamp = self.get_clock().now().to_msg()
+        odom_msg.header.frame_id = "odom"
+        odom_msg.child_frame_id = "base_link"
+        odom_msg.pose.pose.position.x = self.odom[0]
+        odom_msg.pose.pose.position.y = self.odom[1]
+        odom_msg.pose.pose.position.z = 0.0
+        odom_msg.pose.pose.orientation = Quaternion(*self.quaternion)
+        odom_msg.twist.twist.linear.x = self.odom[4]
+        odom_msg.twist.twist.angular.z = self.odom[5]
+        self.odom_publisher.publish
         
-        # # Create odometry message
-        # odom_msg = Odometry()
-        # odom_msg.header.stamp = current_time.to_msg()
-        # odom_msg.header.frame_id = "odom"
-        # odom_msg.child_frame_id = "base_link"
-        
-        # odom_msg.pose.pose.position.x = self.x
-        # odom_msg.pose.pose.position.y = self.y
-        # odom_msg.pose.pose.position.z = 0.0
-        # odom_msg.pose.pose.orientation.w = 0.0
-        
-        # quaternion = tf_transformations.quaternion_from_euler(0, 0, self.yaw)
-        # odom_msg.pose.pose.orientation = Quaternion(*quaternion)
-        
-        # odom_msg.twist.twist.linear.x = v
-        # odom_msg.twist.twist.angular.z = omega
-        
-        # # Publish odometry
-        # self.odom_publisher.publish(odom_msg)
-        
-        # self.get_logger().info(f"[{self.kinematic_model.upper()} MODEL] Odometry Updated: X={self.x:.2f}, Y={self.y:.2f}, Yaw={math.degrees(self.yaw):.2f}°")
-
     def state_space(self):
-        state_space = [0, 0, 0, 0, 0, 0]
-        state_space[0] = self.odom[0] + self.odom[1] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
-        state_space[1] = self.odom[1] + self.odom[4] * self.dt * math.sin(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
-        state_space[2] = self.odom[2] + self.odom[5] * self.dt
-        state_space[4] = (self.rear_vel[0] + self.rear_vel[1]) / 2
-        state_space[5] = self.odom[4]/self.wheelbase * math.tan(self.delta)
+        self.update_state_space = [0, 0, 0, 0, 0, 0]
+        self.update_state_space[0] = self.odom[0] + self.odom[1] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
+        self.update_state_space[1] = self.odom[1] + self.odom[4] * self.dt * math.sin(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
+        self.update_state_space[2] = self.odom[2] + self.odom[5] * self.dt
+        self.quaternion = tf_transformations.quaternion_from_euler(0, 0, self.odom[2])
+        self.update_state_space[4] = (self.rear_vel[0] + self.rear_vel[1]) / 2
+
+        if(self.kinematic_model == 'single_track'):
+            self.update_state_space[5] = self.odom[4]/self.wheelbase * math.tan(self.delta)
+        elif(self.kinematic_model == 'double_track'):
+            self.update_state_space[5] = (self.rear_vel[1] - self.rear_vel[0]) / self.track_width
+        elif(self.kinematic_model == 'yaw_rate'):
+            self.update_state_space[5] = self.odom[5]
         
 def main(args=None):
     rclpy.init(args=args)
