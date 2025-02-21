@@ -25,6 +25,11 @@ install(DIRECTORY
 launch
 description
 config
+meshes
+models
+rviz
+config
+worlds
 DESTINATION share/${PROJECT_NAME})
 
 ament_package()
