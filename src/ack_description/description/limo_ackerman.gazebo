@@ -26,6 +26,7 @@
 
     <gazebo>
         <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+            <robotSimType>gazebo_ros2_control/DefaultRobotHWSim</robotSimType>
             <parameters>$(find ack_description)/config/gazebo_controllers.yaml</parameters>
         </plugin>
     </gazebo>
