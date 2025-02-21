@@ -76,7 +76,7 @@ class AckermannFKWheelOdometry(Node):
         odom_msg.pose.pose.orientation = Quaternion(*self.quaternion)
         odom_msg.twist.twist.linear.x = self.odom[4]
         odom_msg.twist.twist.angular.z = self.odom[5]
-        self.odom_publisher.publish
+        self.odom_publisher.publish(odom_msg)
         
     def state_space(self):
         self.update_state_space = [0, 0, 0, 0, 0, 0]
