@@ -33,9 +33,10 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Install Python executables
 install(PROGRAMS
-  scripts/dummy_script.py
   scripts/ackermann_fk.py
   scripts/ackermann_ik.py
+  scripts/pid_controller.py
+  scripts/pure_pursuit_controller.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -56,6 +57,8 @@ install(TARGETS
 ################ INSTALL LAUNCH, ETC #################
 install(DIRECTORY
   # add directories here
+  launch
+  yaml
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
