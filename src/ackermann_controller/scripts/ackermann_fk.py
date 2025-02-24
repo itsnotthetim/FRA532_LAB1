@@ -58,8 +58,6 @@ class AckermannFKWheelOdometry(Node):
 
 
     def odom_pub(self, odom):
-
-
         odom_msg = Odometry()
         odom_msg.header.stamp = self.get_clock().now().to_msg()
         odom_msg.header.frame_id = "odom"
