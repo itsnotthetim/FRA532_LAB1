@@ -100,7 +100,24 @@ class PIDControllerNode(Node):
         # Timer
         self.create_timer(1/self.rate, self.timer_callback)
 
-    def get_cte(self, robot_x, robot_y, path_x, path_y):
+    # def get_cte(self, robot_x, robot_y, path_x, path_y):
+    #     # Convert path points to numpy arrays
+    #     path_points = np.column_stack((path_x, path_y))
+    #     robot_pos = np.array([robot_x, robot_y])
+
+    #     # Compute Euclidean distances from robot to all path points
+    #     distances = np.linalg.norm(path_points - robot_pos, axis=1)
+
+    #     # Find the closest path point
+    #     min_index = np.argmin(distances)
+    #     closest_point = path_points[min_index]
+        
+    #     # Compute CTE as Euclidean distance
+    #     cte = float(distances[min_index])
+
+    #     return cte, min_index
+
+    def get_cte(self, robot_x, robot_y, path_x, path_y, goal_threshold=0.5):
         # Convert path points to numpy arrays
         path_points = np.column_stack((path_x, path_y))
         robot_pos = np.array([robot_x, robot_y])
@@ -110,12 +127,13 @@ class PIDControllerNode(Node):
 
         # Find the closest path point
         min_index = np.argmin(distances)
-        closest_point = path_points[min_index]
-        
-        # Compute CTE as Euclidean distance
         cte = float(distances[min_index])
 
-        return cte, min_index
+        # Check if robot has reached the goal (i.e., last point in path)
+        goal_reached = (min_index == len(path_points) - 1) and (cte < goal_threshold)
+
+        return cte, min_index, goal_reached
+
 
     def odom_callback(self, msg: Odometry):
         self.odom.position = [msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z]
@@ -133,7 +151,7 @@ class PIDControllerNode(Node):
         all_yaw = [point['yaw'] for point in self.setpoints]
 
         # Calculate error
-        cte, cte_index = self.get_cte(x, y, all_x, all_y)
+        cte, cte_index, reached_goal = self.get_cte(x, y, all_x, all_y)
         sign = -1 if np.sin(yaw) * (all_x[cte_index] - x) - np.cos(yaw) * (all_y[cte_index] - y) > 0 else 1  # Determine side of path
         error_long =  cte*sign# Using cross track error
         error_ang = all_yaw[cte_index] - yaw
@@ -142,12 +160,24 @@ class PIDControllerNode(Node):
         linear_x = 0.5
         angular_z = float(self.ang_pid.update_controller(error_long, 5))
 
+        if reached_goal == True:
+            linear_x = 0.0
+            angular_z = 0.0
+            msg = Twist()
+            msg.linear.x = linear_x
+            msg.angular.z = angular_z
+            self.cmd_vel_publisher.publish(msg)
+            self.get_logger().info("Final waypoint reached. Stopping the robot.")
+            self.get_logger().info("Shutting down PID node.")
+            self.destroy_node()
+            rclpy.shutdown()
+
         # Publish cmd_vel
         msg = Twist()
         msg.linear.x = linear_x
         msg.angular.z = angular_z
         self.cmd_vel_publisher.publish(msg)
-        
+
         self.get_logger().info(f"Error: {error_long}, {error_ang}")
         self.get_logger().info(f"Output: {msg.linear.x}, {msg.angular.z}")
 
