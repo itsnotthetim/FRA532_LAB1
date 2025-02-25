@@ -73,8 +73,8 @@ class PIDControllerNode(Node):
         self.declare_parameter('lat_Kp', 0.1)
         self.declare_parameter('lat_Ki', 0.0)
         self.declare_parameter('lat_Kd', 0.0)
-        self.declare_parameter('ang_Kp', 0.5)
-        self.declare_parameter('ang_Ki', 0.1)
+        self.declare_parameter('ang_Kp', 1.0    )
+        self.declare_parameter('ang_Ki', 0.0)
         self.declare_parameter('ang_Kd', 0.0)
 
         # Rate
@@ -90,9 +90,6 @@ class PIDControllerNode(Node):
         self.ang_Kp = self.get_parameter('ang_Kp').value
         self.ang_Ki = self.get_parameter('ang_Ki').value
         self.ang_Kd = self.get_parameter('ang_Kd').value
-
-        # Parameters subscribers
-        self.add_on_set_parameters_callback(self.parameter_callback)
 
         # Set points
         with open(get_package_share_directory("ackermann_controller")+'/yaml/path.yaml', 'r') as f:
@@ -117,33 +114,13 @@ class PIDControllerNode(Node):
         # Timer
         self.create_timer(1/self.rate, self.timer_callback)
 
-    def update_parameters(self):
-        self.rate = self.get_parameter('rate').value
-        self.long_Kp = self.get_parameter('long_Kp').value
-        self.long_Ki = self.get_parameter('long_Ki').value
-        self.long_Kd = self.get_parameter('long_Kd').value
-        self.lat_Kp = self.get_parameter('lat_Kp').value
-        self.lat_Ki = self.get_parameter('lat_Ki').value
-        self.lat_Kd = self.get_parameter('lat_Kd').value
-        self.ang_Kp = self.get_parameter('ang_Kp').value
-        self.ang_Ki = self.get_parameter('ang_Ki').value
-        self.ang_Kd = self.get_parameter('ang_Kd').value
+    def get_direction(self, x, y, yaw):
 
-    def parameter_callback(self, params):
-        for param in params:
-            if param.name in ['rate', 'long_Kp', 'long_Ki', 'long_Kd', 
-                            'lat_Kp', 'lat_Ki', 'lat_Kd', 
-                            'ang_Kp', 'ang_Ki', 'ang_Kd']:
-                self.get_logger().info(f"Parameter {param.name} updated to {param.value}")
-        self.update_parameters()
-        return SetParametersResult(successful=True)
+        # ใข้วิธีหทุนแกน เพื่อให้รุ้ว่าหันซ้ายหรือขวา
 
-    def get_distance(self, x, y, _x, _y):
-        dx = _x - x
-        dy = _y - y
-        return np.sqrt(dx**2 + dy**2)
+        pass
 
-    def get_cte(self, robot_x, robot_y, robot_yaw, path_x, path_y, path_yaw):
+    def get_cte(self, robot_x, robot_y, path_x, path_y):
         # Convert path points to numpy arrays
         path_points = np.column_stack((path_x, path_y))
         robot_pos = np.array([robot_x, robot_y])
@@ -158,7 +135,7 @@ class PIDControllerNode(Node):
         # Compute CTE as Euclidean distance
         cte = float(distances[min_index])
 
-        return cte
+        return cte, min_index
 
     def odom_callback(self, msg: Odometry):
         self.odom.position = [msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z]
@@ -176,25 +153,23 @@ class PIDControllerNode(Node):
         all_yaw = [point['yaw'] for point in self.setpoints]
 
         # Calculate error
-        # error_long = np.cos(yaw) * (_x - x) + np.sin(yaw) * (_y - y)
-        # error_long = self.get_distance(x, y, _x, _y) # Using distance error
-        error_lat =  self.get_cte(x, y, yaw,all_x, all_y, all_yaw) # Using cross track error
-        # error_ang = _yaw - yaw
-        # error_ang = np.arctan2(np.sin(error_ang), np.cos(error_ang))
+        cte, cte_index = self.get_cte(x, y, all_x, all_y)
+        error_long =  cte # Using cross track error
+        error_ang = all_yaw[cte_index] - yaw
 
         # Calculate output
-        # linear_x = self.long_pid.update_controller(error_long, 1)
+        linear_x = 0.5
         # linear_x = float(self.long_pid.update_controller(error_long, 1))
-        angular_z = float(self.lat_pid.update_controller(error_lat, 1))
         # angular_z = float(self.ang_pid.update_controller(error_ang, 1))
+        angular_z = float(self.ang_pid.update_controller(error_long, 5))
 
         # Publish cmd_vel
         msg = Twist()
-        msg.linear.x = 1.0
+        msg.linear.x = linear_x
         msg.angular.z = angular_z
         self.cmd_vel_publisher.publish(msg)
         
-        self.get_logger().info(f"Error: {1.0}, {error_lat}")
+        self.get_logger().info(f"Error: {error_long}, {error_ang}")
         self.get_logger().info(f"Output: {msg.linear.x}, {msg.angular.z}")
 
 def main(args=None):
