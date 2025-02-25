@@ -31,9 +31,9 @@ class StanleyController(Node):
         self.velocity = 0.5  # Constant forward velocity
 
         # Control Variables
-        self.current_index = 0
         self.position = (0.0, 0.0)
         self.yaw = 0.0
+        self.reached_goal = False  # Flag to indicate completion
 
     def load_waypoints(self, file_path):
         """Load waypoints from YAML file."""
@@ -74,11 +74,14 @@ class StanleyController(Node):
 
     def stanley_control(self):
         """Computes steering control using the Stanley Controller."""
+        if self.reached_goal:
+            return  # Stop execution once goal is reached
+
         waypoint = self.find_nearest_waypoint()
         if waypoint is None:
             return  # No valid waypoint found
 
-        goal_x, goal_y, goal_yaw = waypoint
+        goal_x, goal_y = waypoint
         dx = goal_x - self.position[0]
         dy = goal_y - self.position[1]
         path_heading = math.atan2(dy, dx)
@@ -99,6 +102,18 @@ class StanleyController(Node):
         # Convert Steering Angle to Angular Velocity (for `/cmd_vel`)
         angular_velocity = (2 * self.velocity * math.sin(steering_angle)) / self.wheelbase
 
+        # Check if the robot has reached the final waypoint
+        if len(self.waypoints) > 0 and waypoint == self.waypoints[-1]:
+            final_dx = self.waypoints[-1][0] - self.position[0]
+            final_dy = self.waypoints[-1][1] - self.position[1]
+            final_distance = math.sqrt(final_dx ** 2 + final_dy ** 2)
+
+            if final_distance < 0.1:  # Threshold to determine if the goal is reached
+                self.get_logger().info("Final waypoint reached. Stopping the robot.")
+                self.stop_robot()
+                self.shutdown_node()
+                return
+
         # Publish Velocity Command
         msg = Twist()
         msg.linear.x = self.velocity
@@ -109,6 +124,19 @@ class StanleyController(Node):
         self.get_logger().info(f'Waypoint: ({goal_x}, {goal_y}), Heading Error: {heading_error:.3f}, Cross-Track Error: {cross_track_error:.3f}')
         self.get_logger().info(f'Steering Angle: {steering_angle:.3f}, Velocity: {self.velocity:.3f}, Angular Velocity: {angular_velocity:.3f}')
 
+    def stop_robot(self):
+        """Stops the robot by publishing zero velocity."""
+        stop_msg = Twist()
+        stop_msg.linear.x = 0.0
+        stop_msg.angular.z = 0.0
+        self.publisher.publish(stop_msg)
+
+    def shutdown_node(self):
+        """Shuts down the node safely."""
+        self.reached_goal = True  # Mark that we have reached the goal
+        self.get_logger().info("Shutting down Stanley Controller node.")
+        self.destroy_node()
+        rclpy.shutdown()
 
 def main(args=None):
     rclpy.init(args=args)
