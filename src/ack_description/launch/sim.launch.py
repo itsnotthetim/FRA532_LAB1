@@ -13,7 +13,7 @@ import xacro
 def generate_launch_description():
     package_name = "ack_description"
     controller_package_name = "ackermann_controller"
-    rviz_file_name = "default_config.rviz"
+    rviz_file_name = "lab1-1_validate_config.rviz"
     rviz_file_path = os.path.join(
         get_package_share_directory(package_name),
         'rviz',
