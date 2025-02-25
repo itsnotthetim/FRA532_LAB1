@@ -78,7 +78,7 @@ class StanleyController(Node):
         if waypoint is None:
             return  # No valid waypoint found
 
-        goal_x, goal_y = waypoint
+        goal_x, goal_y, goal_yaw = waypoint
         dx = goal_x - self.position[0]
         dy = goal_y - self.position[1]
         path_heading = math.atan2(dy, dx)
