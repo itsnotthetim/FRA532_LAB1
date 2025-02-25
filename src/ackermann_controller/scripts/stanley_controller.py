@@ -8,14 +8,14 @@ import os
 from pathlib import Path
 from ament_index_python.packages import get_package_share_directory
 
-class PurePursuit(Node):
+class StanleyController(Node):
     def __init__(self):
-        super().__init__('pure_pursuit')
+        super().__init__('stanley_controller')
         
         # ROS2 Publishers & Subscribers
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.subscription = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
-        self.timer = self.create_timer(0.01, self.pure_pursuit_control)  # Run control loop at 100 Hz
+        self.timer = self.create_timer(0.01, self.stanley_control)  # Run control loop at 100 Hz
 
         # Load Waypoints from YAML File
         package_name = "ackermann_controller"  # Your package name
@@ -27,10 +27,10 @@ class PurePursuit(Node):
 
         # Vehicle Parameters
         self.wheelbase = 0.2  # Distance between front and rear wheels (meters)
-        self.lookahead_distance = 0.3  # Adjust for smooth tracking
+        self.k = 1.0  # Gain for Stanley controller
+        self.velocity = 0.5  # Constant forward velocity
 
         # Control Variables
-        self.current_index = 0
         self.position = (0.0, 0.0)
         self.yaw = 0.0
         self.reached_goal = False  # Flag to indicate completion
@@ -39,7 +39,7 @@ class PurePursuit(Node):
         """Load waypoints from YAML file."""
         with open(file_path, "r") as file:
             path_data = yaml.safe_load(file)
-
+        
         waypoints = [(wp["x"], wp["y"]) for wp in path_data]  # Extract (x, y) coordinates
         self.get_logger().info(f"Loaded {len(waypoints)} waypoints from {file_path}")
         return waypoints
@@ -54,49 +54,56 @@ class PurePursuit(Node):
         cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
         self.yaw = math.atan2(siny_cosp, cosy_cosp)
 
-    def find_lookahead_point(self):
-        """Finds the next waypoint that is at least lookahead_distance ahead."""
+    def find_nearest_waypoint(self):
+        """Find the nearest waypoint to the front axle."""
         if not self.waypoints:
             self.get_logger().warn("No waypoints loaded!")
             return None
 
-        for i in range(self.current_index, len(self.waypoints)):
-            dx = self.waypoints[i][0] - self.position[0]
-            dy = self.waypoints[i][1] - self.position[1]
+        min_distance = float('inf')
+        nearest_point = None
+        for wp in self.waypoints:
+            dx = wp[0] - self.position[0]
+            dy = wp[1] - self.position[1]
             distance = math.sqrt(dx ** 2 + dy ** 2)
+            if distance < min_distance:
+                min_distance = distance
+                nearest_point = wp
 
-            if distance >= self.lookahead_distance:
-                self.current_index = i
-                return self.waypoints[i]
+        return nearest_point
 
-        return self.waypoints[-1]  # If no far enough point is found, return the last waypoint
-
-    def pure_pursuit_control(self):
-        """Computes steering control using Pure Pursuit for Ackermann model."""
+    def stanley_control(self):
+        """Computes steering control using the Stanley Controller."""
         if self.reached_goal:
             return  # Stop execution once goal is reached
 
-        lookahead = self.find_lookahead_point()
-        if lookahead is None:
+        waypoint = self.find_nearest_waypoint()
+        if waypoint is None:
             return  # No valid waypoint found
 
-        goal_x, goal_y = lookahead
+        goal_x, goal_y = waypoint
         dx = goal_x - self.position[0]
         dy = goal_y - self.position[1]
-        target_angle = math.atan2(dy, dx)
+        path_heading = math.atan2(dy, dx)
 
-        # Compute heading error (alpha)
-        alpha = target_angle - self.yaw
+        # Compute heading error
+        heading_error = path_heading - self.yaw
+        heading_error = math.atan2(math.sin(heading_error), math.cos(heading_error))  # Normalize
 
-        # Compute Steering Angle (Ackermann)
-        delta = math.atan2(2 * self.wheelbase * math.sin(alpha), self.lookahead_distance)
+        # Compute cross-track error
+        cross_track_error = math.sqrt(dx ** 2 + dy ** 2)
+        sign = -1 if math.sin(self.yaw) * dx - math.cos(self.yaw) * dy > 0 else 1  # Determine side of path
+        cross_track_error *= sign
+
+        # Compute Stanley control law
+        steering_angle = heading_error + math.atan2(self.k * cross_track_error, self.velocity)
+        steering_angle = max(min(steering_angle, math.pi / 4), -math.pi / 4)  # Limit steering angle
 
         # Convert Steering Angle to Angular Velocity (for `/cmd_vel`)
-        v = 0.5  # Constant speed (can be adjusted)
-        w = (2 * v * math.sin(delta)) / self.wheelbase  # Approximate angular velocity
+        angular_velocity = (2 * self.velocity * math.sin(steering_angle)) / self.wheelbase
 
-        # Check if the robot has reached the last waypoint
-        if self.current_index >= len(self.waypoints) - 1:
+        # Check if the robot has reached the final waypoint
+        if len(self.waypoints) > 0 and waypoint == self.waypoints[-1]:
             final_dx = self.waypoints[-1][0] - self.position[0]
             final_dy = self.waypoints[-1][1] - self.position[1]
             final_distance = math.sqrt(final_dx ** 2 + final_dy ** 2)
@@ -109,13 +116,13 @@ class PurePursuit(Node):
 
         # Publish Velocity Command
         msg = Twist()
-        msg.linear.x = v
-        msg.angular.z = w
+        msg.linear.x = self.velocity
+        msg.angular.z = angular_velocity
         self.publisher.publish(msg)
 
         # Debugging Log
-        self.get_logger().info(f'Index: {self.current_index}, Position: {self.position}, Goal: ({goal_x}, {goal_y})')
-        self.get_logger().info(f'alpha: {alpha:.3f}, delta: {delta:.3f}, v: {v:.3f}, w: {w:.3f}')
+        self.get_logger().info(f'Waypoint: ({goal_x}, {goal_y}), Heading Error: {heading_error:.3f}, Cross-Track Error: {cross_track_error:.3f}')
+        self.get_logger().info(f'Steering Angle: {steering_angle:.3f}, Velocity: {self.velocity:.3f}, Angular Velocity: {angular_velocity:.3f}')
 
     def stop_robot(self):
         """Stops the robot by publishing zero velocity."""
@@ -127,13 +134,13 @@ class PurePursuit(Node):
     def shutdown_node(self):
         """Shuts down the node safely."""
         self.reached_goal = True  # Mark that we have reached the goal
-        self.get_logger().info("Shutting down Pure Pursuit node.")
+        self.get_logger().info("Shutting down Stanley Controller node.")
         self.destroy_node()
         rclpy.shutdown()
 
 def main(args=None):
     rclpy.init(args=args)
-    node = PurePursuit()
+    node = StanleyController()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()

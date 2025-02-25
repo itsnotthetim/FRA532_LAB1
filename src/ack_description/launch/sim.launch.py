@@ -12,7 +12,8 @@ import xacro
 
 def generate_launch_description():
     package_name = "ack_description"
-    rviz_file_name = "default_config.rviz"
+    controller_package_name = "ackermann_controller"
+    rviz_file_name = "lab1-1_validate_config.rviz"
     rviz_file_path = os.path.join(
         get_package_share_directory(package_name),
         'rviz',
@@ -81,6 +82,19 @@ def generate_launch_description():
         output = "screen"
     )
 
+    controller = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [
+                os.path.join(
+                    get_package_share_directory(controller_package_name),
+                    "launch",
+                    "controller.launch.py"
+                )
+            ]
+        ),
+        launch_arguments={"controller":"pid", "fk_model":"ground_truth", "ik_model":"ackermann"}.items()
+    )
+
     launch_description = LaunchDescription()
 
     launch_description.add_action(
@@ -114,7 +128,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=forward_position_controllers,
-                on_exit=[rviz],
+                on_exit=[rviz, controller],
             )
         )
     )
@@ -128,7 +142,6 @@ def generate_launch_description():
     )
 
     # Add the rest of the nodes and launch descriptions
-    # launch_description.add_action(rviz)
     launch_description.add_action(gazebo)
     launch_description.add_action(spawn_entity)
     launch_description.add_action(rsp)

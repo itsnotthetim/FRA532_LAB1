@@ -9,11 +9,11 @@ from gazebo_msgs.msg import ModelStates
 import math
 import tf_transformations 
 from tf2_ros import TransformBroadcaster
+from nav2_msgs.srv import SetInitialPose
 
 class AckermannFKWheelOdometry(Node):
     def __init__(self):
-        super().__init__('ackermann_fk_wheel_odometry')
-        
+        super().__init__('ackermann_fk_wheel_odometry', namespace='')
       
         # Declare parameters
         self.dt = 0.01
@@ -21,7 +21,8 @@ class AckermannFKWheelOdometry(Node):
         self.declare_parameter('track_width', 0.14)  # Distance between left and right wheels
         self.declare_parameter('wheel_radius', 0.045)  # Radius of the wheels
         self.declare_parameter('kinematic_model', 'ground_truth')  # Model selection: yaw_rate, single_track, double_track
-        
+        self.declare_parameter('pub_tf', True) # Publish tf or not
+
         # Retrieve parameter values
         self.wheelbase = self.get_parameter('wheelbase').value
         self.track_width = self.get_parameter('track_width').value
@@ -34,10 +35,9 @@ class AckermannFKWheelOdometry(Node):
         
         self.imu_subscriber = self.create_subscription(Imu, '/imu_plugin/out', self.imu_callback, 10)
         self.imu_subscriber = self.create_subscription(ModelStates, '/gazebo/model_states', self.ground_truth_callback, 10)
-        
-        
+
         # Publisher for odometry
-        self.odom_publisher = self.create_publisher(Odometry, '/odom', 10)
+        self.odom_publisher = self.create_publisher(Odometry, 'odom', 10)
         
         self.create_timer(self.dt, self.timer_callback)
         
@@ -51,15 +51,14 @@ class AckermannFKWheelOdometry(Node):
         self.yaw = 0.0
         self.get_logger().info("Ackermann FK Wheel Odometry Node Initialized")
 
+        # Set initial position and orientation
+        self.is_set_initial_pose = False
+
     def timer_callback(self):
         self.state_space()
-        # print(self.odom) 
-        
-
+        # print(self.odom)  
 
     def odom_pub(self, odom):
-
-
         odom_msg = Odometry()
         odom_msg.header.stamp = self.get_clock().now().to_msg()
         odom_msg.header.frame_id = "odom"
@@ -79,20 +78,21 @@ class AckermannFKWheelOdometry(Node):
 
         self.odom_publisher.publish(odom_msg)
 
-        tfs = TransformStamped()
-        tfs.header.stamp = self.get_clock().now().to_msg()
-        tfs.header.frame_id = "odom"
-        tfs.child_frame_id = "base_footprint"
+        if self.get_parameter('pub_tf').value:
+            tfs = TransformStamped()
+            tfs.header.stamp = self.get_clock().now().to_msg()
+            tfs.header.frame_id = "odom"
+            tfs.child_frame_id = "base_footprint"
 
-        tfs.transform.translation.x = float(odom[0])
-        tfs.transform.translation.y = float(odom[1])
-        tfs.transform.translation.z = 0.0
-        tfs.transform.rotation.x = quaternion[0]
-        tfs.transform.rotation.y = quaternion[1]
-        tfs.transform.rotation.z = quaternion[2]
-        tfs.transform.rotation.w = quaternion[3]
-    
-        self.tf_broadcaster.sendTransform(tfs)
+            tfs.transform.translation.x = float(odom[0])
+            tfs.transform.translation.y = float(odom[1])
+            tfs.transform.translation.z = 0.0
+            tfs.transform.rotation.x = quaternion[0]
+            tfs.transform.rotation.y = quaternion[1]
+            tfs.transform.rotation.z = quaternion[2]
+            tfs.transform.rotation.w = quaternion[3]
+        
+            self.tf_broadcaster.sendTransform(tfs)
         
     def state_space(self):
         self.update_state_space = [0, 0, 0, 0, 0, 0]
@@ -104,7 +104,7 @@ class AckermannFKWheelOdometry(Node):
         if(self.kinematic_model == 'single_track'):
             self.update_state_space[5] = (self.odom[4]/self.wheelbase) * math.tan(self.delta)
         elif(self.kinematic_model == 'double_track'):
-            self.update_state_space[5] = (self.rear_vel[1] - self.rear_vel[0]) / self.track_width
+            self.update_state_space[5] = (self.rear_vel[0] - self.rear_vel[1]) / self.track_width
         elif(self.kinematic_model == 'yaw_rate'):
             self.update_state_space[5] = self.yaw
 
@@ -155,6 +155,10 @@ class AckermannFKWheelOdometry(Node):
         self.linX = msg.twist[index].linear.x
         self.angZ = msg.twist[index].angular.z
         self.odom_ground_truth = [self.posX, self.posY, self.yaw_ground_truth, 0 ,self.linX, self.angZ]
+
+        if self.is_set_initial_pose == False:
+            self.odom = self.odom_ground_truth
+            self.is_set_initial_pose = True
 
         
 def main(args=None):

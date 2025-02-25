@@ -16,7 +16,7 @@
     <xacro:gazebo_imu frame_prefix="imu" />
 
     <gazebo>
-      <plugin name="ground_truth_plugin" filename="libgazebo_ros_p3d.so">
+      <plugin name="ground_truth_controller" filename="libgazebo_ros_p3d.so">
         <ros>
           <namespace>/ground_truth</namespace>
           <remapping>odom:=pose</remapping>
