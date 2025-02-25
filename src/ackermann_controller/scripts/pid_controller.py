@@ -67,13 +67,7 @@ class PIDControllerNode(Node):
         
         # Declare parameters
         self.declare_parameter('rate', 100)
-        self.declare_parameter('long_Kp', 0.05)
-        self.declare_parameter('long_Ki', 0.0)
-        self.declare_parameter('long_Kd', 0.0)
-        self.declare_parameter('lat_Kp', 0.1)
-        self.declare_parameter('lat_Ki', 0.0)
-        self.declare_parameter('lat_Kd', 0.0)
-        self.declare_parameter('ang_Kp', 1.0    )
+        self.declare_parameter('ang_Kp', 1.0)
         self.declare_parameter('ang_Ki', 0.0)
         self.declare_parameter('ang_Kd', 0.0)
 
@@ -81,12 +75,6 @@ class PIDControllerNode(Node):
         self.rate = self.get_parameter('rate').value
 
         # PID parameters
-        self.long_Kp = self.get_parameter('long_Kp').value
-        self.long_Ki = self.get_parameter('long_Ki').value
-        self.long_Kd = self.get_parameter('long_Kd').value
-        self.lat_Kp = self.get_parameter('lat_Kp').value
-        self.lat_Ki = self.get_parameter('lat_Ki').value
-        self.lat_Kd = self.get_parameter('lat_Kd').value
         self.ang_Kp = self.get_parameter('ang_Kp').value
         self.ang_Ki = self.get_parameter('ang_Ki').value
         self.ang_Kd = self.get_parameter('ang_Kd').value
@@ -104,8 +92,6 @@ class PIDControllerNode(Node):
         self.odom = odom()
 
         # Create PID controllers
-        self.long_pid = PID_controller(self.long_Kp, self.long_Ki, self.long_Kd)
-        self.lat_pid = PID_controller(self.lat_Kp, self.lat_Ki, self.lat_Kd)
         self.ang_pid = PID_controller(self.ang_Kp, self.ang_Ki, self.ang_Kd)
         
         # Publish cmd_vel
@@ -113,12 +99,6 @@ class PIDControllerNode(Node):
 
         # Timer
         self.create_timer(1/self.rate, self.timer_callback)
-
-    def get_direction(self, x, y, yaw):
-
-        # ใข้วิธีหทุนแกน เพื่อให้รุ้ว่าหันซ้ายหรือขวา
-
-        pass
 
     def get_cte(self, robot_x, robot_y, path_x, path_y):
         # Convert path points to numpy arrays
@@ -154,13 +134,12 @@ class PIDControllerNode(Node):
 
         # Calculate error
         cte, cte_index = self.get_cte(x, y, all_x, all_y)
-        error_long =  cte # Using cross track error
+        sign = -1 if np.sin(yaw) * (all_x[cte_index] - x) - np.cos(yaw) * (all_y[cte_index] - y) > 0 else 1  # Determine side of path
+        error_long =  cte*sign# Using cross track error
         error_ang = all_yaw[cte_index] - yaw
 
         # Calculate output
         linear_x = 0.5
-        # linear_x = float(self.long_pid.update_controller(error_long, 1))
-        # angular_z = float(self.ang_pid.update_controller(error_ang, 1))
         angular_z = float(self.ang_pid.update_controller(error_long, 5))
 
         # Publish cmd_vel
