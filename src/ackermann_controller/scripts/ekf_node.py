@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
 import numpy as np
@@ -11,8 +13,8 @@ class EKFLocalization(Node):
         super().__init__('ekf_localization')
 
         # Subscribe to odometry and GPS
-        self.odom_sub = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
-        self.gps_sub = self.create_subscription(PoseStamped, '/gps_pose', self.gps_callback, 10)
+        self.odom_sub = self.create_subscription(Odometry, 'double_track/odom', self.odom_callback, 10)
+        self.gps_sub = self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
 
         # Publisher for fused odometry
         self.ekf_pub = self.create_publisher(Odometry, '/ekf_odom', 10)
@@ -22,7 +24,7 @@ class EKFLocalization(Node):
         self.P_est = np.eye(3) * 1.0  # Initial covariance matrix
 
         # Process noise covariance (Q) - adjustable
-        self.process_noise = 0.1
+        self.process_noise = 0.5
         self.Q = np.eye(3) * self.process_noise
 
         # Measurement noise covariance (R) - adjustable
@@ -30,7 +32,7 @@ class EKFLocalization(Node):
         self.R = np.eye(2) * self.measurement_noise
 
         # Time step
-        self.dt = 0.1
+        self.dt = 0.01
 
     def odom_callback(self, msg):
         """ EKF Prediction Step using Odometry """

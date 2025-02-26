@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
@@ -14,7 +16,7 @@ class PurePursuit(Node):
         
         # ROS2 Publishers & Subscribers
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.subscription = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.subscription = self.create_subscription(Odometry, '/ekf_odom', self.odom_callback, 10)
         self.timer = self.create_timer(0.01, self.pure_pursuit_control)  # Run control loop at 100 Hz
 
         # Load Waypoints from YAML File
