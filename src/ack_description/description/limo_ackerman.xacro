@@ -74,7 +74,7 @@
     </xacro:limo_imu>
     
     <xacro:limo_left_steering_hinge parent_prefix="base_link" wheel_prefix="left_steering_hinge">
-        <origin xyz="${wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="0 0  0" />
+        <origin xyz="${wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
     </xacro:limo_left_steering_hinge>
 
     <xacro:limo_right_steering_hinge parent_prefix="base_link" wheel_prefix="right_steering_hinge">

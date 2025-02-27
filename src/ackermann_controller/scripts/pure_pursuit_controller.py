@@ -126,7 +126,7 @@ class PurePursuit(Node):
         stop_msg.angular.z = 0.0
         self.publisher.publish(stop_msg)
 
-    def shutdown_node(self):
+    def shutdown_node(self):    
         """Shuts down the node safely."""
         self.reached_goal = True  # Mark that we have reached the goal
         self.get_logger().info("Shutting down Pure Pursuit node.")

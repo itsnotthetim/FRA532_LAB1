@@ -21,7 +21,7 @@
           <namespace>/ground_truth</namespace>
           <remapping>odom:=pose</remapping>
         </ros>
-        <body_name>base_link</body_name>
+        <body_name>base_footprint</body_name>
         <frameName>world</frameName>
         <updateRate>100.0</updateRate>
       </plugin>
