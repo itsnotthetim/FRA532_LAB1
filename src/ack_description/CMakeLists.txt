@@ -30,6 +30,7 @@ models
 rviz
 config
 worlds
+urdf
 DESTINATION share/${PROJECT_NAME})
 
 ament_package()

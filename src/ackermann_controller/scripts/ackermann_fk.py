@@ -96,9 +96,9 @@ class AckermannFKWheelOdometry(Node):
         
     def state_space(self):
         self.update_state_space = [0, 0, 0, 0, 0, 0]
-        self.update_state_space[0] = self.odom[0] + self.odom[4] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
-        self.update_state_space[1] = self.odom[1] + self.odom[4] * self.dt * math.sin(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
-        self.update_state_space[2] = self.odom[2] + self.odom[5] * self.dt
+        self.update_state_space[0] = self.odom[0] + (self.odom[4] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2))
+        self.update_state_space[1] = self.odom[1] + (self.odom[4] * self.dt * math.sin(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2))
+        self.update_state_space[2] = self.odom[2] + (self.odom[5] * self.dt)
         self.update_state_space[4] = (self.rear_vel[0] + self.rear_vel[1]) / 2
 
         if(self.kinematic_model == 'single_track'):
