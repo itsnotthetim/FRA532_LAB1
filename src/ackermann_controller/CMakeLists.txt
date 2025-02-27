@@ -37,6 +37,8 @@ install(PROGRAMS
   scripts/ackermann_ik.py
   scripts/pid_controller.py
   scripts/pure_pursuit_controller.py
+  scripts/gps_emulator.py
+  scripts/ekf_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
