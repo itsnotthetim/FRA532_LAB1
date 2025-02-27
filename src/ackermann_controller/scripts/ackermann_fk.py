@@ -34,7 +34,7 @@ class AckermannFKWheelOdometry(Node):
             JointState, '/joint_states', self.wheel_callback, 10)
         
         self.imu_subscriber = self.create_subscription(Imu, '/imu_plugin/out', self.imu_callback, 10)
-        self.imu_subscriber = self.create_subscription(ModelStates, '/gazebo/model_states', self.ground_truth_callback, 10)
+        self.ground_truth_subscriber = self.create_subscription(ModelStates, '/gazebo/model_states', self.ground_truth_callback, 10)
 
         # Publisher for odometry
         self.odom_publisher = self.create_publisher(Odometry, 'odom', 10)
