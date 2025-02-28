@@ -23,6 +23,25 @@
             <state_interface name="velocity"/>
             <state_interface name="effort"/>
         </joint>
+
+        <joint name="left_front_wheel">
+            <command_interface name="velocity"/>
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+            <state_interface name="velocity"/>S
+            <state_interface name="effort"/>
+        </joint>
+
+        <joint name="right_front_wheel">
+            <command_interface name="velocity"/>
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
         <joint name="left_steer">
             <command_interface name="position">
                 <param name="min">-0.60</param>
