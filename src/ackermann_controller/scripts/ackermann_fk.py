@@ -62,7 +62,7 @@ class AckermannFKWheelOdometry(Node):
         odom_msg = Odometry()
         odom_msg.header.stamp = self.get_clock().now().to_msg()
         odom_msg.header.frame_id = "odom"
-        odom_msg.child_frame_id = "base_footprint"
+        odom_msg.child_frame_id = "base_link"
         odom_msg.pose.pose.position.x = float(odom[0])
         odom_msg.pose.pose.position.y = float(odom[1])
         odom_msg.pose.pose.position.z = 0.0
@@ -82,7 +82,7 @@ class AckermannFKWheelOdometry(Node):
             tfs = TransformStamped()
             tfs.header.stamp = self.get_clock().now().to_msg()
             tfs.header.frame_id = "odom"
-            tfs.child_frame_id = "base_footprint"
+            tfs.child_frame_id = "base_link"
 
             tfs.transform.translation.x = float(odom[0])
             tfs.transform.translation.y = float(odom[1])

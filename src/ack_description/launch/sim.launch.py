@@ -49,7 +49,7 @@ def generate_launch_description():
         package="gazebo_ros",
         executable="spawn_entity.py",
         arguments=[
-            "-topic", "robot_description",
+            "-topic", "/robot_description",
             "-entity", "ackbot",
             "-x", "9.073496746393584",
             "-y", "-0.00005465073750971568",
@@ -133,25 +133,35 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=spawn_entity,
-                on_exit=[joint_state_broadcaster],
+                on_exit=[joint_state_broadcaster, forward_velocity_controllers, forward_position_controllers],
             )
         )
     )
 
-    launch_description.add_action(
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=joint_state_broadcaster,
-                on_exit=[forward_velocity_controllers],
-            )
-        )
-    )
+    # launch_description.add_action(
+    #     RegisterEventHandler(
+    #         event_handler=OnProcessExit(
+    #             target_action=joint_state_broadcaster,
+    #             on_exit=[forward_velocity_controllers],
+    #         )
+    #     )
+    # )
+
+    # launch_description.add_action(
+    #     RegisterEventHandler(
+    #         event_handler=OnProcessExit(
+    #             target_action=forward_velocity_controllers,
+    #             on_exit=[forward_position_controllers],
+    #         )
+    #     )
+    # )
+
 
     launch_description.add_action(
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=forward_velocity_controllers,
-                on_exit=[forward_position_controllers],
+                target_action=forward_position_controllers,
+                on_exit=[rviz, controller]
             )
         )
     )
