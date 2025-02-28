@@ -3,8 +3,6 @@
 
     <xacro:include filename="gazebo.xacro"/>
     <xacro:include filename="imu.xacro"/>
-    <xacro:include filename="transmission.xacro"/>
-
 
     <!-- BASE LINK -->
 
@@ -27,7 +25,6 @@
         <visual>
             <origin xyz="0 0 0.025" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Body.STL"/> -->
                 <box size="0.2 0.13 0.05"/>
             </geometry>
             <material name="Red">
@@ -51,7 +48,6 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Wheel.STL" /> -->
                 <cylinder radius="0.045" length="0.01"/>
                 <material name="Black">
                     <color rgba="0 0 0 1"/>
@@ -61,7 +57,6 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Wheel.STL" /> -->
                 <cylinder radius="0.045" length="0.01"/>
             </geometry>
         </collision>
@@ -74,7 +69,6 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Wheel.STL" /> -->
                 <cylinder radius="0.045" length="0.01"/>
                 <material name="Black">
                     <color rgba="0 0 0 1"/>
@@ -84,7 +78,6 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Wheel.STL" /> -->
                 <cylinder radius="0.045" length="0.01"/>
             </geometry>
         </collision>
@@ -97,7 +90,6 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Wheel.STL" /> -->
                 <cylinder radius="0.045" length="0.01"/>
             </geometry>
             <material name="Black">
@@ -107,7 +99,6 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Wheel.STL" /> -->
                 <cylinder radius="0.045" length="0.01"/>
             </geometry>
         </collision>
@@ -120,7 +111,6 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Wheel.STL" /> -->
                 <cylinder radius="0.045" length="0.01"/>
                 <material name="Black">
                     <color rgba="0 0 0 1"/>
@@ -130,7 +120,6 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <!-- <mesh filename="file:///$(find ack_description)/meshes/Wheel.STL" /> -->
                 <cylinder radius="0.045" length="0.01"/>
             </geometry>
         </collision>
@@ -224,13 +213,5 @@
             velocity="20.0"
             />
     </joint>
-
-    <!-- TRANSMISSIONS -->
-    <xacro:wheel_transmission wheel_prefix="left_front"/>
-    <xacro:wheel_transmission wheel_prefix="right_front"/>
-    <xacro:wheel_transmission wheel_prefix="left_rear"/>
-    <xacro:wheel_transmission wheel_prefix="right_rear"/>
-    <xacro:steering_hinge_transmission wheel_prefix="left"/>
-    <xacro:steering_hinge_transmission wheel_prefix="right"/>
 
 </robot>

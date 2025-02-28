@@ -14,16 +14,6 @@ def generate_launch_description():
 
     package_name = "ackermann_controller"
 
-    ackermann_fk = Node(       
-        package=package_name,
-        executable="ackermann_fk.py",
-        output="screen",
-        parameters=[
-            {"kinematic_model": fk_model},
-            {"pub_tf": False},
-        ],
-    )
-
     ground_truth_fk = Node(
         package=package_name,
         executable="ackermann_fk.py",
@@ -145,12 +135,11 @@ def generate_launch_description():
     launch_description.add_action(declare_controller)
     launch_description.add_action(declare_fk_model)
     launch_description.add_action(declare_ik_model)
-    launch_description.add_action(ackermann_fk)
     launch_description.add_action(ackermann_ik)
     launch_description.add_action(ground_truth_fk)
     launch_description.add_action(single_track_fk)
     launch_description.add_action(double_track_fk)
-    # launch_description.add_action(yaw_rate_fk)
+    launch_description.add_action(yaw_rate_fk)
     # launch_description.add_action(gps_emulator)
     # launch_description.add_action(ekf_node)
     # launch_description.add_action(pid_controller)
