@@ -21,7 +21,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"kinematic_model": "ground_truth"},
-            {"pub_tf": True},
+            {"pub_tf": False},
         ],
     )
 
@@ -43,7 +43,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"kinematic_model": "double_track"},
-            {"pub_tf": False},           
+            {"pub_tf": True},           
         ],
     )
 
@@ -140,8 +140,8 @@ def generate_launch_description():
     launch_description.add_action(single_track_fk)
     launch_description.add_action(double_track_fk)
     launch_description.add_action(yaw_rate_fk)
-    # launch_description.add_action(gps_emulator)
-    # launch_description.add_action(ekf_node)
+    launch_description.add_action(gps_emulator)
+    launch_description.add_action(ekf_node)
     # launch_description.add_action(pid_controller)
     # launch_description.add_action(validate_node)
     # launch_description.add_action(pure_pursuit_controller)

@@ -23,7 +23,6 @@ find_package(ament_cmake REQUIRED)		# cpp (optional)
 ################ INSTALL LAUNCH, ETC #################
 install(DIRECTORY
 launch
-description
 config
 meshes
 models
