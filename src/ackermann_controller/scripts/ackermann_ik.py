@@ -30,8 +30,8 @@ class AckermannIKNode(Node):
 
 
         # Publish Velocity to Wheels
-        self.rear_wheel_publisher = self.create_publisher(Float64MultiArray, '/forward_velocity_controllers/commands', 10)
-        self.front_wheel_publisher = self.create_publisher(Float64MultiArray, '/forward_position_controllers/commands', 10)
+        self.rear_wheel_publisher = self.create_publisher(Float64MultiArray, '/velocity_controllers/commands', 10)
+        self.front_wheel_publisher = self.create_publisher(Float64MultiArray, '/position_controllers/commands', 10)
 
         # Subscribe to cmd_vel topic
         self.cmd_vel_subscriber = self.create_subscription(

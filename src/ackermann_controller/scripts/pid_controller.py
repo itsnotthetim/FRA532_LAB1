@@ -85,7 +85,7 @@ class PIDControllerNode(Node):
         self.count_path = 0
 
         # Get odom
-        self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
         class odom:
             position = [0, 0, 0] # x, y, z
             orientation = [0, 0, 0, 0] # x, y, z, w
