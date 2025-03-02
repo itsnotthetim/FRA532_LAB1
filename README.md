@@ -35,10 +35,13 @@
     <li><a href="#state-estimator">State estimator</a></li>
     <ul>
         <li><a href="#introduction-to-kalman-filter">Introduction to Kalman Filter</a></li>
-        <li><a href="#2-inverse-kinematics-models">Inverse Kinematics Models</a></li>
-        <li><a href="#3-forward-kinematics-models">Forward Kinematics Models</a></li>
-        <li><a href="#4-model-selection-guide">Model selection guide</a></li>
+        <li><a href="#understanding-matrix-q-and-r">Understanding Matrix Q and R</a></li>
+        <li><a href="#tuning-q-and-r">Tuning Q and R</a></li>
+        <li><a href="#implementation">Implementation</a></li>
+        <li><a href="#validation">Validation</a></li>
+        <li><a href="#applications">Applications</a></li>
     </ul>
+    <li><a href="#contributors">Contributors</a></li>
 </ol>
 
 <!-- ABOUT THE PROJECT -->
@@ -554,6 +557,29 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 ## Path tracking controller
 
+Path tracking controller or local planner is the algorithm to tracking the path that given from somewhere like global planner. The goal of this algorithm is based on what mission robot need to do, in this case is only to track the path.
+
+### Controller selection
+
+To select the controllers that given by instruction(PID, Pure Pursuit, Linear MPC, and Stanley). We based on the mission of robot that is tracking the path. And all of controllers in instruction can track the path. So we selected them by using this rules below.
+
+1. EiEi
+2. EuEu
+3. EaEA
+
+### PID controller
+
+
+
+### Pure Pursuit controller
+
+
+
+### Stanley controller
+
+
+
+
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
 ## State estimator
@@ -656,7 +682,7 @@ and $v_k \sim \mathcal{N}(0, R_k)$ is the measurement noise with covariance $R_k
 - **Increase R** for noisy sensors.
 - **Decrease R** if the filter reacts too slowly to changes.
 
-## Implementation
+### Implementation
 
 see in <a href="src/ackermann_controller/scripts/ekf_node.py">EKF_Node</a> or this code below.
 
@@ -759,10 +785,20 @@ class EKFLocalization(Node):
         self.ekf_pub.publish(odom_msg)
 ```
 
+### Validation
+
 ### Applications
 
 - **Autonomous Vehicles**: Self-driving cars use EKF for position tracking.
 - **Mobile Robots**: Localization in SLAM applications.
 - **Drones**: Estimating the position and attitude of UAVs.
+
+<p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
+
+
+## Contributors
+
+1. **Nakarin Jettanatummajit** (65340500033)
+2. **Timmy** (653405000xx)
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
