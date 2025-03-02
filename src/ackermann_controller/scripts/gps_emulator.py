@@ -19,7 +19,7 @@ class DummyNode(Node):
         self.gps_pub = self.create_publisher(PoseStamped, '/gps', 10)
 
         # Define noise standard deviations (adjust these values as needed)
-        self.position_noise_stddev = 0.1  # Standard deviation for position noise (meters)
+        self.position_noise_stddev = 0.05  # Standard deviation for position noise (meters)
         self.orientation_noise_stddev = 0.01  # Standard deviation for quaternion noise
 
     def ground_truth_callback(self, msg: ModelStates):

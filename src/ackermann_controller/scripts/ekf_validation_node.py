@@ -2,85 +2,76 @@
 
 import rclpy
 from rclpy.node import Node
-import matplotlib.pyplot as plt
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
-from threading import Thread
+import matplotlib.pyplot as plt
+import yaml
+from ament_index_python.packages import get_package_share_directory
 
-class RealTimePlot(Node):
+class KinematicValidateNode(Node):
     def __init__(self):
-        super().__init__('real_time_plot')
+        super().__init__('kinematic_validate_node')
 
-        # Subscribe to GPS, EKF Odometry, and Wheel Odometry
-        self.gps_sub = self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
-        self.ekf_sub = self.create_subscription(Odometry, '/ekf_odom', self.ekf_callback, 10)
-        self.odom_sub = self.create_subscription(Odometry, 'ground_truth/odom', self.odom_callback, 10)
+        # Create subscriptions for GPS, EKF Odometry, and Wheel Odometry
+        self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
+        self.create_subscription(Odometry, '/ekf_odom', self.ekf_callback, 10)
+        self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
 
         # Lists to store trajectory points
-        self.gps_x, self.gps_y = [], []
-        self.ekf_x, self.ekf_y = [], []
-        self.odom_x, self.odom_y = [], []
+        self.gps_data = []
+        self.ekf_data = []
+        self.odom_data = []
 
-        # Start the plotting thread
-        self.running = True
-        self.plot_thread = Thread(target=self.plot_data)
-        self.plot_thread.start()
+
+        # Set up Matplotlib for interactive plotting
+        plt.ion()
+        self.fig, self.ax = plt.subplots(figsize=(7, 5))
+        self.gps_line, = self.ax.plot([], [], 'ro', label='GPS', markersize=0.7)
+        self.ekf_line, = self.ax.plot([], [], 'b-', label='EKF Estimate')
+        self.odom_line, = self.ax.plot([], [], 'g--', label='Wheel Odometry')
+        self.ax.set_title("Localization: GPS vs EKF vs Wheel Odometry")
+        self.ax.set_xlabel("X Position (m)")
+        self.ax.set_ylabel("Y Position (m)")
+        self.ax.legend()
+        
+        # Use a timer to update the plot on the main thread
+        self.timer = self.create_timer(0.1, self.plot_data)
 
     def gps_callback(self, msg):
-        """Callback for GPS data"""
-        self.gps_x.append(msg.pose.position.x)
-        self.gps_y.append(msg.pose.position.y)
+        self.gps_data.append([msg.pose.position.x, msg.pose.position.y])
 
     def ekf_callback(self, msg):
-        """Callback for EKF Odometry data"""
-        self.ekf_x.append(msg.pose.pose.position.x)
-        self.ekf_y.append(msg.pose.pose.position.y)
+        self.ekf_data.append([msg.pose.pose.position.x, msg.pose.pose.position.y])
 
     def odom_callback(self, msg):
-        """Callback for Wheel Odometry data"""
-        self.odom_x.append(msg.pose.pose.position.x)
-        self.odom_y.append(msg.pose.pose.position.y)
+        self.odom_data.append([msg.pose.pose.position.x, msg.pose.pose.position.y])
 
     def plot_data(self):
-        """Function to plot data in real-time"""
-        plt.ion()  # Interactive mode on
-        fig, ax = plt.subplots()
+        if self.gps_data:
+            gps_x, gps_y = zip(*self.gps_data)
+            self.gps_line.set_data(gps_x, gps_y)
+
+        if self.ekf_data:
+            ekf_x, ekf_y = zip(*self.ekf_data)
+            self.ekf_line.set_data(ekf_x, ekf_y)
+
+        if self.odom_data:
+            odom_x, odom_y = zip(*self.odom_data)
+            self.odom_line.set_data(odom_x, odom_y)
+
+        all_x = [pt[0] for pt in self.gps_data + self.ekf_data + self.odom_data ]
+        all_y = [pt[1] for pt in self.gps_data + self.ekf_data + self.odom_data ]
+        if all_x and all_y:
+            self.ax.set_xlim(min(all_x) - 1, max(all_x) + 1)
+            self.ax.set_ylim(min(all_y) - 1, max(all_y) + 1)
         
-        while self.running:
-            ax.clear()
-            ax.set_title("Real-Time Localization: GPS vs EKF vs Wheel Odometry")
-            ax.set_xlabel("X Position (m)")
-            ax.set_ylabel("Y Position (m)")
-            ax.grid(True)
-
-            # Plot GPS data
-            if self.gps_x and self.gps_y:
-                ax.scatter(self.gps_x, self.gps_y, color='red', label='GPS', s=10)
-
-            # Plot EKF estimated data
-            if self.ekf_x and self.ekf_y:
-                ax.plot(self.ekf_x, self.ekf_y, color='blue', label='EKF Estimate')
-
-            # Plot Wheel Odometry data
-            if self.odom_x and self.odom_y:
-                ax.plot(self.odom_x, self.odom_y, color='green', linestyle='dashed', label='Wheel Odometry')
-
-            ax.legend()
-            plt.pause(0.1)  # Small delay for real-time updates
-        
-        plt.ioff()  # Turn off interactive mode
-        plt.show()
-
-    def destroy_node(self):
-        """Stop the plotting thread when shutting down"""
-        self.running = False
-        self.plot_thread.join()
-        super().destroy_node()
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = RealTimePlot()
+    node = KinematicValidateNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
