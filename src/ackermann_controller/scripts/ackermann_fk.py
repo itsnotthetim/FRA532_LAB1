@@ -20,7 +20,7 @@ class AckermannFKWheelOdometry(Node):
         self.declare_parameter('wheelbase', 0.2)  # Distance between front and rear axles
         self.declare_parameter('track_width', 0.14)  # Distance between left and right wheels
         self.declare_parameter('wheel_radius', 0.045)  # Radius of the wheels
-        self.declare_parameter('kinematic_model', 'ground_truth')  # Model selection: yaw_rate, single_track, double_track
+        self.declare_parameter('kinematic_model', 'single_track')  # Model selection: yaw_rate, single_track, double_track
         self.declare_parameter('pub_tf', True) # Publish tf or not
 
         # Retrieve parameter values
@@ -33,7 +33,7 @@ class AckermannFKWheelOdometry(Node):
         self.wheel_subscriber = self.create_subscription(
             JointState, '/joint_states', self.wheel_callback, 10)
         
-        self.imu_subscriber = self.create_subscription(Imu, '/imu_plugin/out', self.imu_callback, 10)
+        self.imu_subscriber = self.create_subscription(Imu, '/imu', self.imu_callback, 10)
         self.ground_truth_subscriber = self.create_subscription(ModelStates, '/gazebo/model_states', self.ground_truth_callback, 10)
 
         # Publisher for odometry
@@ -62,7 +62,7 @@ class AckermannFKWheelOdometry(Node):
         odom_msg = Odometry()
         odom_msg.header.stamp = self.get_clock().now().to_msg()
         odom_msg.header.frame_id = "odom"
-        odom_msg.child_frame_id = "base_footprint"
+        odom_msg.child_frame_id = "base_link"
         odom_msg.pose.pose.position.x = float(odom[0])
         odom_msg.pose.pose.position.y = float(odom[1])
         odom_msg.pose.pose.position.z = 0.0
@@ -82,7 +82,7 @@ class AckermannFKWheelOdometry(Node):
             tfs = TransformStamped()
             tfs.header.stamp = self.get_clock().now().to_msg()
             tfs.header.frame_id = "odom"
-            tfs.child_frame_id = "base_footprint"
+            tfs.child_frame_id = "base_link"
 
             tfs.transform.translation.x = float(odom[0])
             tfs.transform.translation.y = float(odom[1])
@@ -94,19 +94,25 @@ class AckermannFKWheelOdometry(Node):
         
             self.tf_broadcaster.sendTransform(tfs)
         
+        # self.get_logger().info(self.is_set_initial_pose)
+        # print(self.is_set_initial_pose)
+
     def state_space(self):
         self.update_state_space = [0, 0, 0, 0, 0, 0]
-        self.update_state_space[0] = self.odom[0] + self.odom[4] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
-        self.update_state_space[1] = self.odom[1] + self.odom[4] * self.dt * math.sin(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2)
-        self.update_state_space[2] = self.odom[2] + self.odom[5] * self.dt
+        self.update_state_space[0] = self.odom[0] + (self.odom[4] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2))
+        self.update_state_space[1] = self.odom[1] + (self.odom[4] * self.dt * math.sin(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2))
+        self.update_state_space[2] = self.odom[2] + (self.odom[5] * self.dt)
         self.update_state_space[4] = (self.rear_vel[0] + self.rear_vel[1]) / 2
 
         if(self.kinematic_model == 'single_track'):
             self.update_state_space[5] = (self.odom[4]/self.wheelbase) * math.tan(self.delta)
+            # print("4")
+            # print(self.update_state_space)
         elif(self.kinematic_model == 'double_track'):
             self.update_state_space[5] = (self.rear_vel[0] - self.rear_vel[1]) / self.track_width
         elif(self.kinematic_model == 'yaw_rate'):
             self.update_state_space[5] = self.yaw
+            # print("5")
 
         if self.kinematic_model != 'ground_truth':
             self.odom = self.update_state_space
@@ -114,6 +120,8 @@ class AckermannFKWheelOdometry(Node):
         else:
             self.odom = self.odom_ground_truth
             self.odom_pub(self.odom_ground_truth)
+
+        # print("3")
 
     def wheel_callback(self, msg: JointState):
 
@@ -124,10 +132,10 @@ class AckermannFKWheelOdometry(Node):
         indices = {name: i for i, name in enumerate(msg.name)}
 
         # Assign values if they exist in the message
-        index_fl = indices.get("left_steering_hinge_wheel")
-        index_fr = indices.get("right_steering_hinge_wheel")
-        index_l = indices.get("rear_left_wheel")
-        index_r = indices.get("rear_right_wheel")
+        index_fl = indices.get("left_steer")
+        index_fr = indices.get("right_steer")
+        index_l = indices.get("left_rear_wheel")
+        index_r = indices.get("right_rear_wheel")
 
         # Compute velocities and steering angles only if indices are found
         if index_l is not None and index_r is not None:
@@ -135,9 +143,12 @@ class AckermannFKWheelOdometry(Node):
 
         if index_fl is not None and index_fr is not None:
             self.delta = (msg.position[index_fr] + msg.position[index_fl]) / 2
-    
+
+        # print("2")
+
     def imu_callback(self, msg: Imu):
         self.yaw = msg.angular_velocity.z
+        # print(self.yaw)
     
     def ground_truth_callback(self, msg: ModelStates):
         index = msg.name.index("ackbot")
@@ -159,7 +170,7 @@ class AckermannFKWheelOdometry(Node):
         if self.is_set_initial_pose == False:
             self.odom = self.odom_ground_truth
             self.is_set_initial_pose = True
-
+            # print("1")
         
 def main(args=None):
     rclpy.init(args=args)
