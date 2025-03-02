@@ -3,7 +3,9 @@
 import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseStamped
 import matplotlib.pyplot as plt
+from threading import Thread
 import yaml
 from ament_index_python.packages import get_package_share_directory
 
@@ -11,18 +13,20 @@ class KinematicValidateNode(Node):
     def __init__(self):
         super().__init__('kinematic_validate_node')
 
-        # Create subscription for ground truth odometry
-        self.create_subscription(Odometry, '/ground_truth/odom', self.ground_truth_callback, 10)
+        # Create subscriptions for GPS, EKF Odometry, and Wheel Odometry
+        self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
+        self.create_subscription(Odometry, '/ekf_odom', self.ekf_callback, 10)
+        self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
 
-        # List to store ground truth positions ([x, y])
-        self.ground_truth_odom_list = []
+        # Lists to store trajectory points
+        self.gps_data = []
+        self.ekf_data = []
+        self.odom_data = []
 
         # Load model path data from YAML file
         try:
             with open(get_package_share_directory("ackermann_controller")+'/yaml/path.yaml', 'r') as f:
                 data = yaml.safe_load(f)
-            # Assuming the YAML file is a list of dictionaries with keys: x, y, yaw.
-            # Extract only the x and y values.
             self.model_path = [[entry['x'], entry['y']] for entry in data if 'x' in entry and 'y' in entry]
         except Exception as e:
             self.get_logger().error(f"Failed to load YAML file: {e}")
@@ -31,55 +35,68 @@ class KinematicValidateNode(Node):
         # Set up Matplotlib for interactive plotting
         plt.ion()
         self.fig, self.ax = plt.subplots(figsize=(7, 5))
-
-        controller_name = 'Pure Pursuit'
-        # controller_name = 'Stanley'
-        # controller_name = 'PID'
-
-        # Create line objects for ground truth and model path data
-        # self.gt_line, = self.ax.plot([], [], 'bo-', label=controller_name, markersize=1)
-        self.gt_line, = self.ax.plot([], [], 'bo-', label=controller_name, markersize=1)
-        # self.gt_line, = self.ax.plot([], [], 'bo-', label=controller_name, markersize=1)
+        self.gps_line, = self.ax.plot([], [], 'ro', label='GPS', markersize=2)
+        self.ekf_line, = self.ax.plot([], [], 'b-', label='EKF Estimate')
+        self.odom_line, = self.ax.plot([], [], 'g--', label='Wheel Odometry')
         self.model_line, = self.ax.plot([], [], 'r--', label='Path', markersize=1)
-
-        # Configure plot appearance
-        self.ax.set_title(controller_name+" vs. Path")
-        self.ax.set_xlabel("X Value")
-        self.ax.set_ylabel("Y Value")
+        self.ax.set_title("Localization: GPS vs EKF vs Wheel Odometry")
+        self.ax.set_xlabel("X Position (m)")
+        self.ax.set_ylabel("Y Position (m)")
         self.ax.legend()
+        
+        # Start plotting thread
+        self.running = True
+        self.plot_thread = Thread(target=self.plot_data)
+        self.plot_thread.start()
 
-    def ground_truth_callback(self, msg: Odometry):
-        # Append new ground truth point from the odometry message
-        self.ground_truth_odom_list.append([msg.pose.pose.position.x, msg.pose.pose.position.y])
-        self.plot_graph()
-        self.fig.canvas.draw()
-        self.fig.canvas.flush_events()
+    def gps_callback(self, msg):
+        self.gps_data.append([msg.pose.position.x, msg.pose.position.y])
 
-    def plot_graph(self):
-        # Update ground truth data line
-        if self.ground_truth_odom_list:
-            gt_x = [pt[0] for pt in self.ground_truth_odom_list]
-            gt_y = [pt[1] for pt in self.ground_truth_odom_list]
-            self.gt_line.set_data(gt_x, gt_y)
+    def ekf_callback(self, msg):
+        self.ekf_data.append([msg.pose.pose.position.x, msg.pose.pose.position.y])
 
-        # Update model path data line using only x and y values
-        if self.model_path:
-            model_x = [pt[0] for pt in self.model_path]
-            model_y = [pt[1] for pt in self.model_path]
-            self.model_line.set_data(model_x, model_y)
+    def odom_callback(self, msg):
+        self.odom_data.append([msg.pose.pose.position.x, msg.pose.pose.position.y])
 
-        # Adjust plot limits to include both datasets
-        all_x = []
-        all_y = []
-        if self.ground_truth_odom_list:
-            all_x.extend([pt[0] for pt in self.ground_truth_odom_list])
-            all_y.extend([pt[1] for pt in self.ground_truth_odom_list])
-        if self.model_path:
-            all_x.extend(model_x)
-            all_y.extend(model_y)
-        if all_x and all_y:
-            self.ax.set_xlim(min(all_x) - 1, max(all_x) + 1)
-            self.ax.set_ylim(min(all_y) - 1, max(all_y) + 1)
+    def plot_data(self):
+        while self.running:
+            if not plt.fignum_exists(self.fig.number):
+                break
+            
+            if self.gps_data:
+                gps_x, gps_y = zip(*self.gps_data)
+                self.gps_line.set_data(gps_x, gps_y)
+
+            if self.ekf_data:
+                ekf_x, ekf_y = zip(*self.ekf_data)
+                self.ekf_line.set_data(ekf_x, ekf_y)
+
+            if self.odom_data:
+                odom_x, odom_y = zip(*self.odom_data)
+                self.odom_line.set_data(odom_x, odom_y)
+
+            if self.model_path:
+                model_x, model_y = zip(*self.model_path)
+                self.model_line.set_data(model_x, model_y)
+
+            all_x = [pt[0] for pt in self.gps_data + self.ekf_data + self.odom_data + self.model_path]
+            all_y = [pt[1] for pt in self.gps_data + self.ekf_data + self.odom_data + self.model_path]
+            if all_x and all_y:
+                self.ax.set_xlim(min(all_x) - 1, max(all_x) + 1)
+                self.ax.set_ylim(min(all_y) - 1, max(all_y) + 1)
+            
+            self.fig.canvas.draw()
+            self.fig.canvas.flush_events()
+            plt.pause(0.1)
+        
+        plt.ioff()
+        plt.show()
+
+    def destroy_node(self):
+        self.running = False
+        self.plot_thread.join()
+        super().destroy_node()
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -91,6 +108,7 @@ def main(args=None):
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
