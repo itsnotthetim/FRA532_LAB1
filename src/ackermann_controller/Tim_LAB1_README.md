@@ -137,8 +137,6 @@ Where:
 **Description**  
 - Yaw Rate model estimates a vehicle’s rotational speed around its vertical axis, essential for dead reckoning-based odometry. By integrating the yaw rate over time, the robot or vehicle can estimate its heading. This is often combined with wheel encoder data and IMU (Inertial Measurement Unit) readings to improve accuracy in mobile robots and self-driving cars (Autonomous).
 
-**Key Equations**  
-
 $$
 \begin{align*}
 \begin{bmatrix}
@@ -160,8 +158,6 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \end{bmatrix}
 \end{align*}
 $$
-
-
 
 **Pros**  
 - Simple and easy to compute.  
