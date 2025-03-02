@@ -22,23 +22,23 @@
     <li><a href="#usage">Usage</a></li>
     <ul>
         <li><a href="#launch-the-project">Launch the project</a></li>
-        <li><a href="#service-call-in-this-project">Service call in this project</a></li>
-        <li><a href="#teleop_twist_keyboard">Teleop twist keyboard</a></li>
+        <li><a href="#run-the-controller-node">Run the controller node</a></li>
     </ul>
-    <li><a href="#features">Features</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#kinematics-of-mobile-robot">Kinematics of Mobile robot</a></li>
+        <ul>
+            <li><a href="#1-robot-model">Robot model</a></li>
+            <li><a href="#2-inverse-kinematics-models">Inverse Kinematics Models</a></li>
+            <li><a href="#3-forward-kinematics-models">Forward Kinematics Models</a></li>
+            <li><a href="#4-model-selection-guide">Model selection guide</a></li>
+        </ul>
+    <li><a href="#path-tracking-controller">Path tracking controller</a></li>
+    <li><a href="#state-estimator">State estimator</a></li>
 </ol>
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project is in FRA532(Mobile Robotics) class at **FIBO** that teach about Mobile robotics. So **LAB1** is the one of class's lab that have 3 sub-labs that are mobile robot kinematics, path tracking controller, and state estimator.
-
-<p align="center"><img src="images/robot_initial_pose.png" alt="Mobile robot kinematics" /></p>
-
-<p align="center"><img src="images/robot_initial_pose.png" alt="Path tracking controller" /></p>
-
-<p align="center"><img src="images/robot_initial_pose.png" alt="State estimator" /></p>
+This project is in FRA532(Mobile Robotics) class at **FIBO** that teach about Mobile robotics. So **LAB1** is the one of class's lab that have 3 sub-labs that are kinematics of mobile robot, path tracking controller, and state estimator.
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -132,7 +132,7 @@ Follow the command below to dowload and install package.
 <!-- USAGE -->
 ## Usage
 
-⚠️ **Warning:** Before use this project you need to `source ~/FRA532_LAB1/install/setup.bash` and `source /opt/ros/humble/setup.bash` everytime that you open new terminal. If you want to make sure that 2 path has been source everytime when open new terminal you can follow the command below and next time you open new terminal .bashrc will source everything you write on that file.
+⚠️  **Warning:**    Before use this project you need to `source ~/FRA532_LAB1/install/setup.bash` and `source /opt/ros/humble/setup.bash` everytime that you open new terminal. If you want to make sure that 2 path has been source everytime when open new terminal you can follow the command below and next time you open new terminal .bashrc will source everything you write on that file.
 
 ```
 echo "source ~/FRA532_LAB1/install/setup.bash" >> ~/.bashrc
@@ -164,6 +164,84 @@ Example: To run the pure pursuit controller you can use this command below.
 ros2 run ackermann_controller pure_pursuit_controller.py
 ```
 
-This step will explain more in Lab <a href="#lab-1.2">1.2</a> section.
+This step will explain more in <a href="#path-tracking-controller">Lab 1.2</a> section.
+
+<p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
+
+## Kinematics of Mobile robot
+
+This section provided robot model with inverse and forward kinematics for simulate, control, and calculate odometry of robot.
+
+### 1. Robot model
+
+#### 1.1 Robot description
+
+Robot description is the part that have to use for visualize in rviz and simulate in gazebo. You can check our robot description <a href="src/ack_description/urdf/robot.xacro">here</a>.
+
+<p align="center"><img src="images/robot_model.png" alt="Robot model" /></p>
+
+This model is based on intruction of this lab, see below.
+
+<p align="center"><img src="images/model_instruction.png" alt="Model instuction" /></p>
+
+Additionaly, for <a href="#31-yaw-rate-model">Yaw-Rate Model</a> we add imu sensor frame (yellow cylinder on the head) to simulate imu sensor and link it into gazebo.
+
+#### 1.2 Transformation
+
+<p align="center"><img src="images/tf.png" alt="Robot model" /></p>
+
+The transformation tree is:
+
+* base_link
+    * chassis
+        * left_rear_wheel_link
+        * left_steer_link
+            * left_front_wheel_link
+        * right_rear_wheel_link
+        * right_steer_link
+            * right_front_wheel_link
+        * imu_link
+
+And after we create robot odometry transformation tree will change into this:
+
+* world
+    * odom
+        * base_link
+            * chassis
+                * left_rear_wheel_link
+                * left_steer_link
+                    * left_front_wheel_link
+                * right_rear_wheel_link
+                * right_steer_link
+                    * right_front_wheel_link
+                * imu_link
+
+If we use `view frame` of `tf2_tools`, the result is a image below.
+
+<p align="center"><img src="images/tf_viewframe.png" alt="tf_viewframe" /></p>
+
+### 2. Inverse Kinematics Models
+
+#### 2.1 Bicycle Model
+
+#### 2.2 No-Slip Condition Model
+
+### 3. Forward Kinematics Models
+
+#### 3.1 Yaw-Rate Model
+
+#### 3.2 Single-Track Model
+
+#### 3.3 Double-Track Model
+
+### 4. Model Selection Guide
+
+<p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
+
+## Path tracking controller
+
+<p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
+
+## State estimator
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
