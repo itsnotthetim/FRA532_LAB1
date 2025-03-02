@@ -183,8 +183,7 @@ $$
 - Single-Track model approximates a four-wheeled vehicle as a single-track system, treating both left and right wheels as one virtual wheel per axle. 
 - It simplifies kinematic calculations for estimating the vehicle's position and orientation to determine velocity and heading changes..
 
-$$
-\begin{align*}
+$$\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -202,8 +201,7 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
 \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
 \end{bmatrix}
-\end{align*}
-$$
+\end{align*}$$
 
 
 **Pros**  
