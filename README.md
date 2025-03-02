@@ -33,6 +33,12 @@
         </ul>
     <li><a href="#path-tracking-controller">Path tracking controller</a></li>
     <li><a href="#state-estimator">State estimator</a></li>
+    <ul>
+        <li><a href="#introduction-to-kalman-filter">Introduction to Kalman Filter</a></li>
+        <li><a href="#2-inverse-kinematics-models">Inverse Kinematics Models</a></li>
+        <li><a href="#3-forward-kinematics-models">Forward Kinematics Models</a></li>
+        <li><a href="#4-model-selection-guide">Model selection guide</a></li>
+    </ul>
 </ol>
 
 <!-- ABOUT THE PROJECT -->
@@ -222,19 +228,327 @@ If we use `view frame` of `tf2_tools`, the result is a image below.
 
 ### 2. Inverse Kinematics Models
 
+Inverse kinematics models is using for calculate twist at robot frame into wheel speed.
+
 #### 2.1 Bicycle Model
+
+<p align="center"><img src="" alt="bicycle model image" /></p>
+
+**Description**  
+
+- A simplified model representing a four-wheel Ackermann vehicle using one front steering wheel and one rear driving wheel.  
+- The front wheel turns at an angle $\delta$, and the rear wheel drives the vehicle forward.
+
+**Key Equations** 
+
+$$
+\dot{x} = v \cos(\theta)
+$$
+
+$$
+\dot{y} = v \sin(\theta)
+$$
+
+$$
+\dot{\theta} = \frac{v}{L} \tan(\delta)
+$$
+
+To find the required steering angle $\delta$:
+
+$$
+\delta = \arctan\left(\frac{L \dot{\theta}}{v}\right)
+$$
+
+**Validation**
+
+<p align="center"><img src="" alt="bicycle model validate image" /></p>
+
+**Pros**  
+- Simple and easy to use.  
+- Requires fewer parameters, making it fast for real-time control.  
+
+**Cons**  
+- Less accurate at high speeds due to missing slip and weight effects.  
+- Assumes only one steering wheel, ignoring left-right differences.  
+
+**Suitable Applications**  
+- Low-speed robots and path planning.  
+- Teaching basic vehicle kinematics.  
 
 #### 2.2 No-Slip Condition Model
 
+<p align="center"><img src="" alt="no slip image" /></p>
+
+**Description**  
+- Assumes that wheels roll without slipping, meaning all wheels must share the same turning center.  
+- The left and right front wheels turn at different angles to follow Ackermann steering.
+
+**Key Equations**  
+
+$$
+\cot(\delta_L) - \cot(\delta_R) = \frac{TW}{WB}
+$$
+
+$$
+\delta_{Ack} = \frac{\delta_{in}}{\gamma}
+$$
+
+$$
+\delta_L = \tan^{-1}\left( \frac{WB \cdot \tan(\delta_{Ack})}{WB + 0.5 \cdot TW \cdot \tan(\delta_{Ack})} \right)
+$$
+
+$$
+\delta_R = \tan^{-1}\left( \frac{WB \cdot \tan(\delta_{Ack})}{WB - 0.5 \cdot TW \cdot \tan(\delta_{Ack})} \right)
+$$
+
+Where:
+- $\delta_L$ and $\delta_R$ are the left and right wheel angles, respectively.
+- $\delta_{Ack}$ is the Ackermann angle.
+- $\delta_{in} $ is the input steering angle.
+- $ \gamma$ is a scaling factor.
+- $TW$ is the track width (distance between the left and right wheels).
+- $ WB $ $is the wheelbase (distance between the front and rear axles).
+- $P_{Ack}$ is the Ackermann percentage.
+
+**Validation**
+
+<p align="center"><img src="" alt="no slip validate image" /></p>
+
+**Pros**  
+- More accurate at low speeds since it enforces pure rolling motion.  
+- Ensures correct Ackermann geometry.  
+
+**Cons**  
+- More complex to implement.  
+- Becomes inaccurate at high speeds due to tire slip.  
+
+**Suitable Applications**  
+- Precise low-speed maneuvers (e.g., parking, AGVs).  
+- Vehicles where minimizing slip is important.  
+
+---
+
+⚠️ *In case, the code for the Bicycle model and the No-Slip Condition Constraints model shares similar equations, the implementation will be mostly the same, with some differences specific to each model. The code will look like this.*
+
+```python 
+    def cmd_vel_callback(self, msg: Twist):
+            self.linear_velocity = msg.linear.x  # Forward velocity (m/s)
+            self.angular_velocity = msg.angular.z  # Rotation velocity (rad/s)
+
+            if self.linear_velocity != 0.0:
+                # Bicycle Model
+                delta = math.atan((self.WB * self.angular_velocity) / self.linear_velocity)
+
+                # Ackerman Steering Type: No-Slip
+                delta_Ack = delta / self.gamma
+                delta_L = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB - 0.5 * self.TW * math.tan(delta_Ack)))
+                delta_R = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB + 0.5 * self.TW * math.tan(delta_Ack)))
+            
+            else:
+                delta = 0.0
+                delta_Ack = 0.0
+                delta_L = 0.0
+                delta_R = 0.0
+
+            
+            if self.model == 'bicycle':
+                steering_angle_left_wheel = delta
+                steering_angle_right_wheel = delta
+            elif self.model == 'ackermann':
+                steering_angle_left_wheel = delta_L
+                steering_angle_right_wheel = delta_R
+
+            speed_rear_wheel = self.linear_velocity / self.wheel_radius
+```
+
 ### 3. Forward Kinematics Models
+
+Forward kinematics models is using for calculate wheel speed into robot twist(at robot frame).
 
 #### 3.1 Yaw-Rate Model
 
+<p align="center"><img src="" alt="yaw rate image" /></p>
+
+**Description**
+
+- Yaw Rate model estimates a vehicle’s rotational speed around its vertical axis, essential for dead reckoning-based odometry. By integrating the yaw rate over time, the robot or vehicle can estimate its heading. This is often combined with wheel encoder data and IMU (Inertial Measurement Unit) readings to improve accuracy in mobile robots and self-driving cars (Autonomous).
+
+**Key Equations** 
+
+$$
+\begin{align*}
+\begin{bmatrix}
+x_k \\
+y_k \\
+\theta_k \\
+\beta_k \\
+v_k \\
+\omega_k
+\end{bmatrix}
+&=
+\begin{bmatrix}
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
+\beta_{R,k}^{\ast} \\
+\frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
+\quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
+\end{bmatrix}
+\end{align*}
+$$
+
+**Validation**
+
+<p align="center"><img src="" alt="yaw rate validate image" /></p>
+
+**Pros**  
+- Simple and easy to compute.  
+- Works well if an IMU is available.  
+
+**Cons**  
+- Errors in yaw rate measurements affect accuracy.  
+- Does not consider individual wheel dynamics.  
+
+**Suitable Applications**  
+- IMU-based odometry.  
+- Fast and simple pose estimation.  
+
 #### 3.2 Single-Track Model
+
+<p align="center"><img src="" alt="single track image" /></p>
+
+**Description**
+
+- Single-Track model approximates a four-wheeled vehicle as a single-track system, treating both left and right wheels as one virtual wheel per axle. 
+- It simplifies kinematic calculations for estimating the vehicle's position and orientation to determine velocity and heading changes..
+
+**Key Equations**
+
+$$\begin{align*}
+\begin{bmatrix}
+x_k \\
+y_k \\
+\theta_k \\
+\beta_k \\
+v_k \\
+\omega_k
+\end{bmatrix}
+&=
+\begin{bmatrix}
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
+\beta_{R,k}^{\ast} \\
+\frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
+\quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
+\end{bmatrix}
+\end{align*}$$
+
+**Validation**
+
+<p align="center"><img src="" alt="single track validate image" /></p>
+
+**Pros**  
+- Balances simplicity and accuracy.  
+- Useful for medium-speed applications. 
+- Fast Calculations – Suitable for real-time control applications. 
+
+**Cons**  
+- Still an approximation, does not model lateral slip or weight transfer.  
+- Errors increase during sharp turns.  
+
+**Suitable Applications**  
+- General-purpose mobile robots.  
+- Mid-speed autonomous vehicles. 
 
 #### 3.3 Double-Track Model
 
+<p align="center"><img src="" alt="Double track image" /></p>
+
+**Description**
+
+- Double-Track model considers each wheel independently to make it more precise for odometry. By accounts for lateral wheel slips, load transfers, and individual wheel speeds. This is useful in high-accuracy odometry for vehicles with independent drive wheels or complex dynamics like four-wheeled mobile robots (ackerman model like we did). 
+
+**Key Equations**
+
+$$\begin{align*}
+\begin{bmatrix}
+x_k \\
+y_k \\
+\theta_k \\
+\beta_k \\
+v_k \\
+\omega_k
+\end{bmatrix}
+&=
+\begin{bmatrix}
+x_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
+0 \\
+\frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\
+\frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
+\end{bmatrix}
+\end{align*}$$
+
+**Validation**
+
+<p align="center"><img src="" alt="double track validate image" /></p>
+
+**Pros**  
+- Most accurate for real-world applications.  
+- Works well at high speeds and in dynamic environments.  
+
+**Cons**  
+- Requires more sensors (wheel speeds, individual steering angles).  
+- Computationally more expensive.  
+
+**Suitable Applications**  
+- High-speed vehicles (racing, advanced robotics).  
+- Automotive research and testing.
+
+---
+
+⚠️ *The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this:*
+
+```python
+    def state_space(self):
+        self.update_state_space = [0, 0, 0, 0, 0, 0]
+        self.update_state_space[0] = self.odom[0] + (self.odom[4] * self.dt * math.cos(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2))
+        self.update_state_space[1] = self.odom[1] + (self.odom[4] * self.dt * math.sin(self.odom[3] + self.odom[2] + (self.odom[5]* self.dt)/2))
+        self.update_state_space[2] = self.odom[2] + (self.odom[5] * self.dt)
+        self.update_state_space[4] = (self.rear_vel[0] + self.rear_vel[1]) / 2
+
+        if(self.kinematic_model == 'single_track'):
+            self.update_state_space[5] = (self.odom[4]/self.wheelbase) * math.tan(self.delta)
+            # print("4")
+            # print(self.update_state_space)
+        elif(self.kinematic_model == 'double_track'):
+            self.update_state_space[5] = (self.rear_vel[0] - self.rear_vel[1]) / self.track_width
+        elif(self.kinematic_model == 'yaw_rate'):
+            self.update_state_space[5] = self.yaw
+            # print("5")
+
+        if self.kinematic_model != 'ground_truth':
+            self.odom = self.update_state_space
+            self.odom_pub(self.odom)
+        else:
+            self.odom = self.odom_ground_truth
+            self.odom_pub(self.odom_ground_truth)
+```
+
+---
+
 ### 4. Model Selection Guide
+
+- **Inverse Kinematics**  
+  - **Bicycle Model**: Best for simple path-following and control.  
+  - **No-Slip Model**: Best for precise low-speed maneuvers.  
+
+- **Forward Kinematics**  
+  - **Yaw-Rate Model**: Easy to implement; works well with IMU.  
+  - **Single-Track Model**: More accurate for steering-based motion.  
+  - **Double-Track Model**: Best for high-speed and complex dynamics. 
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
@@ -243,5 +557,211 @@ If we use `view frame` of `tf2_tools`, the result is a image below.
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
 ## State estimator
+
+For accurate localization in mobile robot application, we use extended kalman filter to do sensor fusion for more accurate odometry.
+
+### Introduction to Kalman Filter
+
+The **Kalman Filter** is an optimal recursive Bayesian estimator that predicts the state of a dynamic system and updates its estimates based on noisy sensor measurements. It assumes that the system follows a linear Gaussian model and consists of two main steps:
+
+1. **Prediction:** The filter predicts the next state based on the motion model.
+2. **Update (Correction):** The filter updates its state estimate using sensor observations.
+
+For nonlinear systems, the **Extended Kalman Filter (EKF)** linearizes the system at each time step.
+
+### Problem Formulation
+
+Given a mobile robot operating in a 2D space, the goal is to estimate its **position**  $\mu$  and **orientation**  $\theta$  based on odometry and sensor readings.
+
+#### State Representation
+
+The system state is represented as:
+
+$$X_k = \begin{bmatrix} x_k \\ y_k \\ \theta_k \end{bmatrix}$$
+
+where:
+- $x_k$ , $y_k$ are the position coordinates.
+- $\theta_k$  is the orientation angle.
+
+#### Motion Model (Prediction Step)
+
+The robot's motion is modeled by a control input \($U_k$\), which includes the velocity \($v_k$\) and angular velocity \($\omega_k$\):
+
+$$X_{k+1} = f(X_k, U_k) + w_k$$
+
+where:
+
+$$\begin{bmatrix} x_{k+1} \\ y_{k+1} \\ \theta_{k+1} \end{bmatrix} =
+\begin{bmatrix} x_k + v_k \Delta t \cos\theta_k \\ y_k + v_k \Delta t \sin\theta_k \\ \theta_k + \omega_k \Delta t \end{bmatrix} + w_k$$
+
+
+- $w_k \sim \mathcal{N}(0, Q_k)$ represents process noise with covariance $Q_k$.
+
+#### Observation Model (Update Step)
+
+Sensor measurements  $Z_k$  provide noisy observations of the actual state:
+
+$$Z_k = h(X_k) + v_k$$
+
+where:
+
+$$Z_k = \begin{bmatrix} x_k^m \\ y_k^m \end{bmatrix} + v_k$$
+and $v_k \sim \mathcal{N}(0, R_k)$ is the measurement noise with covariance $R_k$.
+
+#### EKF Algorithm Steps
+
+1. **Prediction Step:**
+
+   $$\hat{X}_{k+1} = f(X_k, U_k)$$
+   
+   $$P_{k+1} = F_k P_k F_k^T + Q_k$$
+   where $F_k$ is the Jacobian of $f(X_k, U_k)$.
+
+2. **Update Step:**
+   
+   $$K_k = P_k H_k^T (H_k P_k H_k^T + R_k)^{-1}$$
+ 
+   $$X_k = \hat{X}_k + K_k (Z_k - h(\hat{X}_k))$$
+   
+   $$P_k = (I - K_k H_k) P_k$$
+  
+   where H_k$ is the Jacobian of the measurement function \($h(X_k)$\), and K_k$ is the **Kalman Gain**.
+
+### Understanding Matrix Q and R
+
+#### Process Noise Covariance Matrix (Q)
+
+- Represents uncertainty in the system's **motion model** due to unmodeled dynamics, control input inaccuracies, and external disturbances.
+- Mathematically influences the state covariance update in the **prediction step**:
+  
+    $$P_{k+1} = F_k P_k F_k^T + Q_k$$ 
+  
+- **Large Q:** The filter adapts quickly but produces noisy estimates.
+- **Small Q:** The filter is stable but slow to respond to changes.
+
+#### Measurement Noise Covariance Matrix (R)
+
+- Represents uncertainty in **sensor measurements** due to sensor resolution limits, environmental interference, and sampling variations.
+- Influences the **update step**:
+  
+   $$S_k = H_k P_k H_k^T + R_k$$ 
+  
+- **Large R:** The filter trusts the motion model more, reducing sensitivity to sensor noise but slowing adaptation.
+- **Small R:** The filter follows sensor readings closely but may overreact to noise.
+
+### Tuning Q and R
+
+- **Increase Q** for unpredictable motion.
+- **Decrease Q** if estimates vary too much.
+- **Increase R** for noisy sensors.
+- **Decrease R** if the filter reacts too slowly to changes.
+
+## Implementation
+
+see in <a href="src/ackermann_controller/scripts/ekf_node.py">EKF_Node</a> or this code below.
+
+```python
+class EKFLocalization(Node):
+    def __init__(self):
+        super().__init__('ekf_localization')
+
+        # Subscribe to odometry and GPS
+        self.odom_sub = self.create_subscription(Odometry, 'single_track/odom', self.odom_callback, 10)
+        self.gps_sub = self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
+
+        # Publisher for fused odometry
+        self.ekf_pub = self.create_publisher(Odometry, '/ekf_odom', 10)
+
+        # State vector: [x, y, theta]
+        self.x_est = np.array([0.0, 0.0, 0.0])  # Initial estimate
+        self.P_est = np.eye(3) * 1.0  # Initial covariance matrix
+
+        # Process noise covariance (Q) - adjustable
+        self.process_noise = 0.5
+        self.Q = np.eye(3) * self.process_noise
+
+        # Measurement noise covariance (R) - adjustable
+        self.measurement_noise = 0.5
+        self.R = np.eye(2) * self.measurement_noise
+
+        # Time step
+        self.dt = 0.01
+
+    def odom_callback(self, msg):
+        """ EKF Prediction Step using Odometry """
+        v = msg.twist.twist.linear.x  # Forward velocity
+        omega = msg.twist.twist.angular.z  # Angular velocity
+        theta = self.x_est[2]
+
+        # State transition function (Prediction)
+        x_pred = np.array([
+            self.x_est[0] + v * np.cos(theta) * self.dt,
+            self.x_est[1] + v * np.sin(theta) * self.dt,
+            self.x_est[2] + omega * self.dt
+        ])
+
+        # Jacobian of motion model (F)
+        F = np.array([
+            [1, 0, -v * np.sin(theta) * self.dt],
+            [0, 1,  v * np.cos(theta) * self.dt],
+            [0, 0,  1]
+        ])
+
+        # Predicted covariance
+        P_pred = F @ self.P_est @ F.T + self.Q
+
+        # Update estimated values
+        self.x_est = x_pred
+        self.P_est = P_pred
+
+        # Publish the updated estimate
+        self.publish_estimate()
+
+    def gps_callback(self, msg):
+        """ EKF Update Step using GPS """
+        z = np.array([msg.pose.position.x, msg.pose.position.y])  # Measurement
+
+        # Measurement matrix (H)
+        H = np.array([[1, 0, 0], [0, 1, 0]])
+
+        # Innovation (residual)
+        y = z - H @ self.x_est
+
+        # Innovation covariance
+        S = H @ self.P_est @ H.T + self.R
+
+        # Kalman Gain
+        K = self.P_est @ H.T @ np.linalg.inv(S)
+
+        # Updated state estimate
+        self.x_est = self.x_est + K @ y
+
+        # Updated covariance
+        self.P_est = (np.eye(3) - K @ H) @ self.P_est
+
+        # Publish the updated estimate
+        self.publish_estimate()
+
+    def publish_estimate(self):
+        """ Publish the EKF estimated pose as Odometry message """
+        odom_msg = Odometry()
+        odom_msg.header.stamp = self.get_clock().now().to_msg()
+        odom_msg.header.frame_id = "odom"
+
+        # Assign estimated state
+        odom_msg.pose.pose.position.x = self.x_est[0]
+        odom_msg.pose.pose.position.y = self.x_est[1]
+
+        # Convert theta (yaw) to quaternion
+        q = tf_transformations.quaternion_from_euler(0, 0, self.x_est[2])
+        odom_msg.pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+
+        self.ekf_pub.publish(odom_msg)
+```
+
+### Applications
+- **Autonomous Vehicles**: Self-driving cars use EKF for position tracking.
+- **Mobile Robots**: Localization in SLAM applications.
+- **Drones**: Estimating the position and attitude of UAVs.
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
