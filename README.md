@@ -760,6 +760,7 @@ class EKFLocalization(Node):
 ```
 
 ### Applications
+
 - **Autonomous Vehicles**: Self-driving cars use EKF for position tracking.
 - **Mobile Robots**: Localization in SLAM applications.
 - **Drones**: Estimating the position and attitude of UAVs.
