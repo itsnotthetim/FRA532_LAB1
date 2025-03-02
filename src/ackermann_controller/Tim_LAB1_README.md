@@ -220,27 +220,7 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 **Description**  
 - Double-Track model considers each wheel independently to make it more precise for odometry. By accounts for lateral wheel slips, load transfers, and individual wheel speeds. This is useful in high-accuracy odometry for vehicles with independent drive wheels or complex dynamics like four-wheeled mobile robots (ackerman model like we did) . 
 
-$$
-\begin{align*}
-\begin{bmatrix}
-x_k \\
-y_k \\
-\theta_k \\
-\beta_k \\
-v_k \\
-\omega_k
-\end{bmatrix}
-=
-\begin{bmatrix}
-x_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
-0 \\
-\frac{\tilde{v}_{RL,k}^2 + \tilde{v}_{RR,k}^2}{2} \\
-\frac{\tilde{v}_{RR,k}^2 - \tilde{v}_{RL,k}^2}{(r_{RR,y} - r_{RL,y})}
-\end{bmatrix}
-\end{align*}
-$$
+
 
 **Pros**  
 - Most accurate for real-world applications.  
