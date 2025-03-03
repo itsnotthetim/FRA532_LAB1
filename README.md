@@ -235,7 +235,7 @@ Inverse kinematics models is using for calculate twist at robot frame into wheel
 
 #### 2.1 Bicycle Model
 
-<p align="center"><img src="" alt="bicycle model image" /></p>
+<p align="center"><img src="images/BicycleModelGeometry.png" alt="bicycle model image" /></p>
 
 **Description**  
 
@@ -280,7 +280,7 @@ $$
 
 #### 2.2 No-Slip Condition Model
 
-<p align="center"><img src="" alt="no slip image" /></p>
+<p align="center"><img src="images/No-slip_steering_ack_model.png" alt="no slip image" /></p>
 
 **Description**  
 - Assumes that wheels roll without slipping, meaning all wheels must share the same turning center.  
@@ -370,7 +370,7 @@ Forward kinematics models is using for calculate wheel speed into robot twist(at
 
 #### 3.1 Yaw-Rate Model
 
-<p align="center"><img src="" alt="yaw rate image" /></p>
+<p align="center"><img src="images/Yaw-Rate-fk.png" alt="yaw rate image" /></p>
 
 **Description**
 
@@ -418,7 +418,7 @@ $$
 
 #### 3.2 Single-Track Model
 
-<p align="center"><img src="" alt="single track image" /></p>
+<p align="center"><img src="images/Single-Track-fk.png" alt="single track image" /></p>
 
 **Description**
 
@@ -466,7 +466,7 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 #### 3.3 Double-Track Model
 
-<p align="center"><img src="" alt="Double track image" /></p>
+<p align="center"><img src="images/Double-track-fk.png" alt="Double track image" /></p>
 
 **Description**
 
@@ -524,14 +524,10 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
         if(self.kinematic_model == 'single_track'):
             self.update_state_space[5] = (self.odom[4]/self.wheelbase) * math.tan(self.delta)
-            # print("4")
-            # print(self.update_state_space)
         elif(self.kinematic_model == 'double_track'):
             self.update_state_space[5] = (self.rear_vel[0] - self.rear_vel[1]) / self.track_width
         elif(self.kinematic_model == 'yaw_rate'):
             self.update_state_space[5] = self.yaw
-            # print("5")
-
         if self.kinematic_model != 'ground_truth':
             self.odom = self.update_state_space
             self.odom_pub(self.odom)
