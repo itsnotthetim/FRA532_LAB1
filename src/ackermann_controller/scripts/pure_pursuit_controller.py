@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Bool  # Import Bool message type
 import math
 import yaml
 import os
@@ -18,6 +19,9 @@ class PurePursuit(Node):
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.subscription = self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
         self.timer = self.create_timer(0.01, self.pure_pursuit_control)  # Run control loop at 100 Hz
+
+        # Add a publisher for is_finished
+        self.is_finished_pub = self.create_publisher(Bool, 'is_finished', 10)
 
         # Load Waypoints from YAML File
         package_name = "ackermann_controller"  # Your package name
@@ -128,6 +132,11 @@ class PurePursuit(Node):
 
     def shutdown_node(self):    
         """Shuts down the node safely."""
+        # Publish is_finished = True
+        is_finished_msg = Bool()
+        is_finished_msg.data = True
+        self.is_finished_pub.publish(is_finished_msg)
+
         self.reached_goal = True  # Mark that we have reached the goal
         self.get_logger().info("Shutting down Pure Pursuit node.")
         self.destroy_node()

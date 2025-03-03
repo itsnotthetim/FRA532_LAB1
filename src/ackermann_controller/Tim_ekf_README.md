@@ -72,6 +72,22 @@ and $v_k \sim \mathcal{N}(0, R_k)$ is the measurement noise with covariance $R_k
 - **Large Q:** The filter adapts quickly but produces noisy estimates.
 - **Small Q:** The filter is stable but slow to respond to changes.
 
+So the matix $ Q$ should be like this
+
+
+$$Q =
+\begin{bmatrix}
+\sigma_x^2 & 0 & 0 \\
+0 & \sigma_y^2 & 0 \\
+0 & 0 & \sigma_\theta^2
+\end{bmatrix}$$
+
+
+where:
+
+-  $\sigma_x^2 $ and  $\sigma_y^2 $ represent **position uncertainty** (meters²),
+-  $\sigma_\theta^2$  represents **heading uncertainty** (radians²).
+
 ### Measurement Noise Covariance Matrix (R)
 - Represents uncertainty in **sensor measurements** due to sensor resolution limits, environmental interference, and sampling variations.
 - Influences the **update step**:
