@@ -485,6 +485,8 @@ The results for each model are shown in the following graphs below:
 
         <p align="center"><img src="images/Bicycle-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
 
+        ---
+
     * Path tracking velocity = 0.5 m/s
 
         <p align="center"><img src="images/Bicycle-0.5-pos-kine-validate.png" alt="Double track image" /></p>
@@ -494,6 +496,8 @@ The results for each model are shown in the following graphs below:
         <p align="center"><img src="images/Bicycle-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
 
         <p align="center"><img src="images/Bicycle-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
+
+        ---
 
 2. No-Slip Condition Model
 
@@ -507,6 +511,8 @@ The results for each model are shown in the following graphs below:
 
         <p align="center"><img src="images/no-slip-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
 
+        ---
+
     * Path tracking velocity = 0.5 m/s
 
         <p align="center"><img src="images/no-slip-0.5-pos-kine-validate.png" alt="Double track image" /></p>
@@ -516,6 +522,8 @@ The results for each model are shown in the following graphs below:
         <p align="center"><img src="images/no-slip-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
 
         <p align="center"><img src="images/no-slip-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
+
+        ---
 
 **Conclusion:**
 
@@ -529,8 +537,8 @@ The results for each model are shown in the following graphs below:
 
 - **Forward Kinematics**  
   - **Yaw-Rate Model**: Easy to implement; works well with IMU.  
-  - **Single-Track Model**: More accurate for steering-based motion.  
-  - **Double-Track Model**: Best for high-speed and complex dynamics. 
+  - **Single-Track Model**: More accurate for steering-based motion.
+  - **Double-Track Model**: Best for high-speed and complex dynamics.
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
