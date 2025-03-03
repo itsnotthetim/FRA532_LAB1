@@ -243,7 +243,7 @@ if __name__ == '__main__':
 ```
 ## Tuning Configurations and Results
 
-We tested five different settings for **Q** and recorded the errors. Here are the results:
+We tested five different settings for **Q** with Ackerman steering type: Double-track model and recorded the errors for demonstrated how to tune the matrix Q. Here are the results:
 
 ### 1. Initial Configuration 
 
