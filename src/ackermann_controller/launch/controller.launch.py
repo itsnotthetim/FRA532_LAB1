@@ -98,6 +98,12 @@ def generate_launch_description():
         )
     )
 
+    data_saver = Node(
+        package=package_name,
+        executable='data_saver.py',
+        output='screen'
+    )
+
     validate_node = Node(
         package=package_name,
         executable='kinematic_validate_node.py',
@@ -123,15 +129,6 @@ def generate_launch_description():
     )
 
     launch_description = LaunchDescription()
-    
-    # launch_description.add_action(
-    #     RegisterEventHandler(
-    #         event_handler=OnProcessExit(
-    #             target_action=gps_emulator,
-    #             on_exit=[ekf_node],
-    #         )
-    #     )
-    # )
     launch_description.add_action(declare_controller)
     launch_description.add_action(declare_fk_model)
     launch_description.add_action(declare_ik_model)
@@ -142,8 +139,6 @@ def generate_launch_description():
     launch_description.add_action(yaw_rate_fk)
     launch_description.add_action(gps_emulator)
     launch_description.add_action(ekf_node)
-    # launch_description.add_action(pid_controller)
-    # launch_description.add_action(validate_node)
-    # launch_description.add_action(pure_pursuit_controller)
+    launch_description.add_action(data_saver)
 
     return launch_description

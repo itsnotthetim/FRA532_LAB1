@@ -56,7 +56,6 @@ class AckermannFKWheelOdometry(Node):
 
     def timer_callback(self):
         self.state_space()
-        # print(self.odom)  
 
     def odom_pub(self, odom):
         odom_msg = Odometry()
@@ -93,9 +92,6 @@ class AckermannFKWheelOdometry(Node):
             tfs.transform.rotation.w = quaternion[3]
         
             self.tf_broadcaster.sendTransform(tfs)
-        
-        # self.get_logger().info(self.is_set_initial_pose)
-        # print(self.is_set_initial_pose)
 
     def state_space(self):
         self.update_state_space = [0, 0, 0, 0, 0, 0]
@@ -106,22 +102,16 @@ class AckermannFKWheelOdometry(Node):
 
         if(self.kinematic_model == 'single_track'):
             self.update_state_space[5] = (self.odom[4]/self.wheelbase) * math.tan(self.delta)
-            # print("4")
-            # print(self.update_state_space)
         elif(self.kinematic_model == 'double_track'):
             self.update_state_space[5] = (self.rear_vel[0] - self.rear_vel[1]) / self.track_width
         elif(self.kinematic_model == 'yaw_rate'):
             self.update_state_space[5] = self.yaw
-            # print("5")
-
         if self.kinematic_model != 'ground_truth':
             self.odom = self.update_state_space
             self.odom_pub(self.odom)
         else:
             self.odom = self.odom_ground_truth
             self.odom_pub(self.odom_ground_truth)
-
-        # print("3")
 
     def wheel_callback(self, msg: JointState):
 
@@ -144,11 +134,8 @@ class AckermannFKWheelOdometry(Node):
         if index_fl is not None and index_fr is not None:
             self.delta = (msg.position[index_fr] + msg.position[index_fl]) / 2
 
-        # print("2")
-
     def imu_callback(self, msg: Imu):
         self.yaw = msg.angular_velocity.z
-        # print(self.yaw)
     
     def ground_truth_callback(self, msg: ModelStates):
         index = msg.name.index("ackbot")
@@ -170,7 +157,6 @@ class AckermannFKWheelOdometry(Node):
         if self.is_set_initial_pose == False:
             self.odom = self.odom_ground_truth
             self.is_set_initial_pose = True
-            # print("1")
         
 def main(args=None):
     rclpy.init(args=args)

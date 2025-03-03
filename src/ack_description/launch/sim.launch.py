@@ -57,38 +57,6 @@ def generate_launch_description():
         ],
         output = "screen"
     )
-    
-    # joint_state_broadcaster_spawner = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-    # )
-
-    # robot_controller_spawner = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["velocity_controllers", "--controller-manager", "/controller_manager"],
-    # )
-    # position_controller_spawner = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["position_controller", "--controller-manager", "/controller_manager"],
-    # )
-
-    # joint_state_broadcaster = ExecuteProcess(
-    #     cmd=["ros2", "control", "load_controller", "--set-state", "active", "joint_state_broadcaster"],
-    #     output="screen"
-    # )
-
-    # forward_position_controllers = ExecuteProcess(
-    #     cmd=["ros2", "control", "load_controller", "--set-state", "active", "forward_position_controllers"],
-    #     output="screen"
-    # )
-
-    # forward_velocity_controllers = ExecuteProcess(
-    #     cmd=["ros2", "control", "load_controller", "--set-state", "active", "forward_velocity_controllers"],
-    #     output="screen"
-    # )
 
     joint_state_broadcaster = ExecuteProcess(
         cmd=["ros2", "control", "load_controller", "--set-state", "active", "joint_state_broadcaster"],
@@ -138,25 +106,6 @@ def generate_launch_description():
         )
     )
 
-    # launch_description.add_action(
-    #     RegisterEventHandler(
-    #         event_handler=OnProcessExit(
-    #             target_action=joint_state_broadcaster,
-    #             on_exit=[forward_velocity_controllers],
-    #         )
-    #     )
-    # )
-
-    # launch_description.add_action(
-    #     RegisterEventHandler(
-    #         event_handler=OnProcessExit(
-    #             target_action=forward_velocity_controllers,
-    #             on_exit=[forward_position_controllers],
-    #         )
-    #     )
-    # )
-
-
     launch_description.add_action(
         RegisterEventHandler(
             event_handler=OnProcessExit(
@@ -165,33 +114,6 @@ def generate_launch_description():
             )
         )
     )
-
-    # launch_description.add_action(
-    #     RegisterEventHandler(
-    #         event_handler=OnProcessExit(
-    #             target_action=spawn_entity,
-    #             on_exit=[joint_state_broadcaster_spawner],
-    #         )
-    #     )
-    # )
-
-    # launch_description.add_action(
-    #     RegisterEventHandler(
-    #         event_handler=OnProcessExit(
-    #             target_action=joint_state_broadcaster_spawner,
-    #             on_exit=[robot_controller_spawner, position_controller_spawner],
-    #         )
-    #     )
-    # )
-
-    # launch_description.add_action(
-    #     RegisterEventHandler(
-    #         event_handler=OnProcessExit(
-    #             target_action=joint_state_broadcaster_spawner,
-    #             on_exit=[rviz, controller],
-    #         )
-    #     )
-    # )
 
     # Static Transform Publisher (world -> odom)
     static_tf = launch_ros.actions.Node(

@@ -39,6 +39,7 @@ install(PROGRAMS
   scripts/pure_pursuit_controller.py
   scripts/gps_emulator.py
   scripts/ekf_node.py
+  scripts/data_saver.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
