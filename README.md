@@ -29,7 +29,8 @@
             <li><a href="#1-robot-model">Robot model</a></li>
             <li><a href="#2-inverse-kinematics-models">Inverse Kinematics Models</a></li>
             <li><a href="#3-forward-kinematics-models">Forward Kinematics Models</a></li>
-            <li><a href="#4-model-selection-guide">Model selection guide</a></li>
+            <li><a href="#4-validation">Validation</a></li>
+            <li><a href="#5-model-selection-guide">Model selection guide</a></li>
         </ul>
     <li><a href="#path-tracking-controller">Path tracking controller</a></li>
     <li><a href="#state-estimator">State estimator</a></li>
@@ -262,22 +263,6 @@ $$
 \delta = \arctan\left(\frac{L \dot{\theta}}{v}\right)
 $$
 
-**Validation**
-
-<p align="center"><img src="" alt="bicycle model validate image" /></p>
-
-**Pros**  
-- Simple and easy to use.  
-- Requires fewer parameters, making it fast for real-time control.  
-
-**Cons**  
-- Less accurate at high speeds due to missing slip and weight effects.  
-- Assumes only one steering wheel, ignoring left-right differences.  
-
-**Suitable Applications**  
-- Low-speed robots and path planning.  
-- Teaching basic vehicle kinematics.  
-
 #### 2.2 No-Slip Condition Model
 
 <p align="center"><img src="images/No-slip_steering_ack_model.png" alt="no slip image" /></p>
@@ -312,22 +297,6 @@ Where:
 - $TW$ is the track width (distance between the left and right wheels).
 - $ WB $ $is the wheelbase (distance between the front and rear axles).
 - $P_{Ack}$ is the Ackermann percentage.
-
-**Validation**
-
-<p align="center"><img src="" alt="no slip validate image" /></p>
-
-**Pros**  
-- More accurate at low speeds since it enforces pure rolling motion.  
-- Ensures correct Ackermann geometry.  
-
-**Cons**  
-- More complex to implement.  
-- Becomes inaccurate at high speeds due to tire slip.  
-
-**Suitable Applications**  
-- Precise low-speed maneuvers (e.g., parking, AGVs).  
-- Vehicles where minimizing slip is important.  
 
 ---
 
@@ -400,22 +369,6 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \end{align*}
 $$
 
-**Validation**
-
-<p align="center"><img src="" alt="yaw rate validate image" /></p>
-
-**Pros**  
-- Simple and easy to compute.  
-- Works well if an IMU is available.  
-
-**Cons**  
-- Errors in yaw rate measurements affect accuracy.  
-- Does not consider individual wheel dynamics.  
-
-**Suitable Applications**  
-- IMU-based odometry.  
-- Fast and simple pose estimation.  
-
 #### 3.2 Single-Track Model
 
 <p align="center"><img src="images/Single-Track-fk.png" alt="single track image" /></p>
@@ -447,23 +400,6 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \end{bmatrix}
 \end{align*}$$
 
-**Validation**
-
-<p align="center"><img src="" alt="single track validate image" /></p>
-
-**Pros**  
-- Balances simplicity and accuracy.  
-- Useful for medium-speed applications. 
-- Fast Calculations – Suitable for real-time control applications. 
-
-**Cons**  
-- Still an approximation, does not model lateral slip or weight transfer.  
-- Errors increase during sharp turns.  
-
-**Suitable Applications**  
-- General-purpose mobile robots.  
-- Mid-speed autonomous vehicles. 
-
 #### 3.3 Double-Track Model
 
 <p align="center"><img src="images/Double-track-fk.png" alt="Double track image" /></p>
@@ -494,22 +430,6 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \end{bmatrix}
 \end{align*}$$
 
-**Validation**
-
-<p align="center"><img src="" alt="double track validate image" /></p>
-
-**Pros**  
-- Most accurate for real-world applications.  
-- Works well at high speeds and in dynamic environments.  
-
-**Cons**  
-- Requires more sensors (wheel speeds, individual steering angles).  
-- Computationally more expensive.  
-
-**Suitable Applications**  
-- High-speed vehicles (racing, advanced robotics).  
-- Automotive research and testing.
-
 ---
 
 ⚠️ *The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this:*
@@ -538,7 +458,44 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 ---
 
-### 4. Model Selection Guide
+### 4. Validation
+
+To compare and validate the result, we have to analyze as follows:
+
+1. Position.
+2. Orientation.
+3. Linear velocity.
+4. Angular velocity.
+
+For see which model is stronger in which aspect or what is the strong point of those models. Additionally, the results will based on <a href="#2-inverse-kinematics-models">inverse kinematics model</a>.
+
+⚠️ **In the validation process, we use <a href="#pure-pursuit-controller">pure pursuit controller </a> to be our controller to move the robot around the map via tracking the path.**
+
+The results for each model are shown in the following graphs below:
+
+1. Bicycle Model
+
+    * Path tracking velocity = 0.5 m/s
+
+
+
+    * Path tracking velocity = 1.0 m/s
+
+
+2. No-Slip Condition Model
+
+    * Path tracking velocity = 0.5 m/s
+
+
+
+    * Path tracking velocity = 1.0 m/s
+
+
+**Conclusion:**
+
+
+
+### 5. Model selection guide
 
 - **Inverse Kinematics**  
   - **Bicycle Model**: Best for simple path-following and control.  

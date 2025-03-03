@@ -9,6 +9,7 @@ import yaml
 import os
 from pathlib import Path
 from ament_index_python.packages import get_package_share_directory
+from std_msgs.msg import Bool
 
 class PurePursuit(Node):
     def __init__(self):
@@ -18,6 +19,7 @@ class PurePursuit(Node):
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.subscription = self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
         self.timer = self.create_timer(0.01, self.pure_pursuit_control)  # Run control loop at 100 Hz
+        self.reached_goal_pub = self.create_publisher(Bool, "/reached_goal", 10)
 
         # Load Waypoints from YAML File
         package_name = "ackermann_controller"  # Your package name
@@ -94,7 +96,7 @@ class PurePursuit(Node):
         delta = math.atan2(2 * self.wheelbase * math.sin(alpha), self.lookahead_distance)
 
         # Convert Steering Angle to Angular Velocity (for `/cmd_vel`)
-        v = 0.5  # Constant speed (can be adjusted)
+        v = 1.0  # Constant speed (can be adjusted)
         w = (2 * v * math.sin(delta)) / self.wheelbase  # Approximate angular velocity
 
         # Check if the robot has reached the last waypoint
@@ -104,6 +106,7 @@ class PurePursuit(Node):
             final_distance = math.sqrt(final_dx ** 2 + final_dy ** 2)
 
             if final_distance < 0.1:  # Threshold to determine if the goal is reached
+                self.reached_goal_pub.publish(Bool(data=True))
                 self.get_logger().info("Final waypoint reached. Stopping the robot.")
                 self.stop_robot()
                 self.shutdown_node()
@@ -114,6 +117,7 @@ class PurePursuit(Node):
         msg.linear.x = v
         msg.angular.z = w
         self.publisher.publish(msg)
+        self.reached_goal_pub.publish(Bool(data=False))
 
         # Debugging Log
         self.get_logger().info(f'Index: {self.current_index}, Position: {self.position}, Goal: ({goal_x}, {goal_y})')
