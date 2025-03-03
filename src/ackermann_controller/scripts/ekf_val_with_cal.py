@@ -20,7 +20,7 @@ class KinematicValidateNode(Node):
         self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
         self.create_subscription(Odometry, '/ekf_odom', self.ekf_callback, 10)
         self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
-        self.create_subscription(Odometry, '/yaw_rate/odom', self.single_track_callback, 10)
+        self.create_subscription(Odometry, '/double_track/odom', self.single_track_callback, 10)
         self.create_subscription(Bool, '/is_finished', self.is_finished_callback, 10)
 
         # Load Waypoints from YAML File
@@ -40,6 +40,11 @@ class KinematicValidateNode(Node):
         self.odom_yaw_data = []
         self.single_track_yaw_data = []
 
+        # Variables to track errors
+        self.cumulative_position_error = 0.0
+        self.cumulative_yaw_error = 0.0
+        self.num_samples = 0
+
         # Variable to track the previous state of is_finished
         self.previous_is_finished = False
 
@@ -48,21 +53,21 @@ class KinematicValidateNode(Node):
         self.fig, (self.ax_traj, self.ax_yaw) = plt.subplots(1, 2, figsize=(14, 5))
         self.gps_line, = self.ax_traj.plot([], [], 'ro', label='GPS', markersize=0.7)
         self.ekf_line, = self.ax_traj.plot([], [], 'b-', label='EKF Estimate')
-        self.odom_line, = self.ax_traj.plot([], [], 'g--', label='Ground Truth')
-        self.single_track_line, = self.ax_traj.plot([], [], 'c-.', label='Yaw rate Model')
-        self.ax_traj.set_title("EKF: Yaw rate Model Validation")
+        self.odom_line, = self.ax_traj.plot([], [], 'g--', label='Wheel Odometry')
+        self.single_track_line, = self.ax_traj.plot([], [], 'c-.', label='Double track Model')
+        self.ax_traj.set_title("EKF: Double track Model Validation")
         self.ax_traj.set_xlabel("X Position (m)")
         self.ax_traj.set_ylabel("Y Position (m)")
         self.ax_traj.legend()
 
         self.ekf_yaw_line, = self.ax_yaw.plot([], [], 'b-', label='EKF Yaw')
-        self.odom_yaw_line, = self.ax_yaw.plot([], [], 'g--', label='Ground Truth Yaw')
-        self.single_track_yaw_line, = self.ax_yaw.plot([], [], 'c-.', label='Yaw rate Yaw')
+        self.odom_yaw_line, = self.ax_yaw.plot([], [], 'g--', label='Wheel Odometry Yaw')
+        self.single_track_yaw_line, = self.ax_yaw.plot([], [], 'c-.', label='Double track Yaw')
         self.ax_yaw.set_title("Yaw Data Comparison")
         self.ax_yaw.set_xlabel("Time Step")
         self.ax_yaw.set_ylabel("Yaw (rad)")
         self.ax_yaw.legend()
-        
+
         # Use a timer to update the plot on the main thread
         self.timer = self.create_timer(0.1, self.plot_data)
 
@@ -91,7 +96,30 @@ class KinematicValidateNode(Node):
     def odom_callback(self, msg):
         self.odom_data.append([msg.pose.pose.position.x, msg.pose.pose.position.y])
         self.odom_yaw_data.append(self.extract_yaw(msg))
-    
+
+        # Calculate position error (Euclidean distance between EKF and ground truth)
+        if self.ekf_data and self.odom_data:
+            ekf_pos = np.array(self.ekf_data[-1])
+            odom_pos = np.array(self.odom_data[-1])
+            position_error = np.linalg.norm(ekf_pos - odom_pos)
+            self.cumulative_position_error += position_error
+
+            # Calculate yaw error (absolute difference between EKF and ground truth)
+            ekf_yaw = self.ekf_yaw_data[-1]
+            odom_yaw = self.odom_yaw_data[-1]
+            yaw_error = abs(ekf_yaw - odom_yaw)
+            self.cumulative_yaw_error += yaw_error
+
+            # Increment the number of samples
+            self.num_samples += 1
+
+            # Log mean errors
+            if self.num_samples > 0:
+                mean_position_error = self.cumulative_position_error / self.num_samples
+                mean_yaw_error = self.cumulative_yaw_error / self.num_samples
+                self.get_logger().info(f"Mean Position Error: {mean_position_error:.4f} m")
+                self.get_logger().info(f"Mean Yaw Error: {mean_yaw_error:.4f} rad")
+
     def single_track_callback(self, msg):
         self.single_track_data.append([msg.pose.pose.position.x, msg.pose.pose.position.y])
         self.single_track_yaw_data.append(self.extract_yaw(msg))
@@ -99,9 +127,8 @@ class KinematicValidateNode(Node):
     def is_finished_callback(self, msg):
         """Callback for the /is_finished topic."""
         if not self.previous_is_finished and msg.data:  # Check for False -> True transition
-            self.get_logger().info("Received is_finished = True. Saving data and shutting down...")
-            self.save_to_yaml()
-            self.save_figure()
+            self.get_logger().info("Received is_finished = True. Saving figure and shutting down...")
+            self.save_figure()  # Save the figure before shutting down
             self.shutdown_node()
         self.previous_is_finished = msg.data  # Update the previous state
 
@@ -136,30 +163,14 @@ class KinematicValidateNode(Node):
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-    def save_to_yaml(self):
-        """Save data to a YAML file."""
-        data_to_save = {
-            'ground_truth_positions': [list(map(float, pos)) for pos in self.odom_data],
-            'ground_truth_yaws': [float(yaw) for yaw in self.odom_yaw_data],
-            'ekf_positions': [list(map(float, pos)) for pos in self.ekf_data],
-            'ekf_yaws': [float(yaw) for yaw in self.ekf_yaw_data],
-        }
-
-        file_path = os.path.join(self.package_path, "yaml/path.yaml")
-        with open(file_path, 'w') as file:
-            yaml.dump(data_to_save, file, default_flow_style=False)
-        self.get_logger().info(f"Data saved to {self.save_yaml}")
-
     def save_figure(self):
         """Save the figure to the workspace."""
         # Construct the path to save the figure in the workspace
-        package_name = "ackermann_controller"
-        workspace_path = Path(get_package_share_directory(package_name)).parents[3]
-        figure_path = workspace_path / "figures"
+        figure_path = self.package_path / "figures"
         figure_path.mkdir(exist_ok=True)  # Create the directory if it doesn't exist
 
         # Save the figure as a PNG file
-        figure_file = figure_path / "ekf_yaw_rate_validation.png"
+        figure_file = figure_path / "ekf_validation_figure.png"
         self.fig.savefig(figure_file, dpi=300, bbox_inches='tight')
         self.get_logger().info(f"Figure saved to {figure_file}")
 
@@ -170,16 +181,17 @@ class KinematicValidateNode(Node):
         rclpy.shutdown()
 
 def main(args=None):
-    rclpy.init(args=args)
-    node = KinematicValidateNode()
+    rclpy.init(args=args)  # Initialize the ROS 2 Python client library
+    node = KinematicValidateNode()  # Create an instance of the KinematicValidateNode
+
     try:
-        rclpy.spin(node)
+        rclpy.spin(node)  # Keep the node running and processing callbacks
     except KeyboardInterrupt:
-        node.get_logger().info("Node interrupted by user.")
+        node.get_logger().info("Node interrupted by user.")  # Handle user interruption (e.g., Ctrl+C)
     finally:
-        if rclpy.ok():
-            node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():  # Check if ROS 2 is still running
+            node.destroy_node()  # Clean up the node
+        rclpy.shutdown()  # Shut down the ROS 2 Python client library
 
 if __name__ == '__main__':
     main()

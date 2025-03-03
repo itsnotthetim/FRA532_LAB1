@@ -17,6 +17,12 @@ def calculate_mean_errors(yaml_path):
     ground_truth_positions = np.array(data['ground_truth_positions'])
     ground_truth_yaw = ground_truth_positions[:, 1]
 
+    # Drop the first 180 indices
+    ekf_positions = ekf_positions[200:]
+    ground_truth_positions = ground_truth_positions[200:]
+    ekf_yaw = ekf_yaw[200:]
+    ground_truth_yaw = ground_truth_yaw[200:]
+
     # Ensure both arrays have the same length by trimming to the minimum length
     min_length = min(len(ekf_positions), len(ground_truth_positions))
 
@@ -40,7 +46,7 @@ def main():
     installed_package_path = Path(get_package_share_directory(package_name))
     workspace_path = installed_package_path.parents[3]  # Move up to workspace root
     package_path = workspace_path / "src" / package_name  # Construct the src path
-    yaml_path = os.path.join(package_path, "yaml/ekf_mea_yaw_rate_error.yaml")
+    yaml_path = os.path.join(package_path, "yaml/ekf_inc22_double_track_validation.yaml")
 
     mean_position_error, mean_yaw_error = calculate_mean_errors(yaml_path)
 

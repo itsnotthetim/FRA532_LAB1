@@ -18,7 +18,7 @@ class PurePursuit(Node):
         
         # ROS2 Publishers & Subscribers
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.subscription = self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
+        self.subscription = self.create_subscription(Odometry, '/double_track/odom', self.odom_callback, 10)
         self.timer = self.create_timer(0.01, self.pure_pursuit_control)  # Run control loop at 100 Hz
         self.reached_goal_pub = self.create_publisher(Bool, "/reached_goal", 10)
 
@@ -100,7 +100,7 @@ class PurePursuit(Node):
         delta = math.atan2(2 * self.wheelbase * math.sin(alpha), self.lookahead_distance)
 
         # Convert Steering Angle to Angular Velocity (for `/cmd_vel`)
-        v = 1.0  # Constant speed (can be adjusted)
+        v = 0.5  # Constant speed (can be adjusted)
         w = (2 * v * math.sin(delta)) / self.wheelbase  # Approximate angular velocity
 
         # Check if the robot has reached the last waypoint
