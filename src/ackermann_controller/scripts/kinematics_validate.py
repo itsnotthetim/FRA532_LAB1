@@ -49,7 +49,7 @@ def trim_model_data(gt_time, model_time, model_pos, model_yaw):
 
 def main():
     # Load the collected YAML data
-    yaml_path = "/home/sunny/FRA532_LAB1/src/ackermann_controller/yaml/no-slip-kinematics.yaml"
+    yaml_path = "/home/sunny/FRA532_LAB1/src/ackermann_controller/yaml/bicycle-kinematics0.25.yaml"
     try:
         with open(yaml_path, "r") as f:
             data = yaml.safe_load(f)
@@ -63,7 +63,7 @@ def main():
     gt_yaw = data["ground_truth"]["yaw"]
 
     # Trim the first 37 entries of ground truth
-    trim_count = 37
+    trim_count = 136
     if len(gt_time) > trim_count:
         gt_time = gt_time[trim_count:]
         gt_pos = gt_pos[trim_count:]

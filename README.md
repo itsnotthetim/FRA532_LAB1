@@ -475,21 +475,47 @@ The results for each model are shown in the following graphs below:
 
 1. Bicycle Model
 
+    * Path tracking velocity = 0.25 m/s
+
+        <p align="center"><img src="images/Bicycle-0.25-pos-kine-validate.png" alt="Double track image" /></p>
+
+        <p align="center"><img src="images/Bicycle-0.25-orient-kine-validate.png" alt="Double track image" /></p>
+
+        <p align="center"><img src="images/Bicycle-0.25-pos-error-kine-validate.png" alt="Double track image" /></p>
+
+        <p align="center"><img src="images/Bicycle-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
+
     * Path tracking velocity = 0.5 m/s
 
+        <p align="center"><img src="images/Bicycle-0.5-pos-kine-validate.png" alt="Double track image" /></p>
 
+        <p align="center"><img src="images/Bicycle-0.5-orient-kine-validate.png" alt="Double track image" /></p>
 
-    * Path tracking velocity = 1.0 m/s
+        <p align="center"><img src="images/Bicycle-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
 
+        <p align="center"><img src="images/Bicycle-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
 
 2. No-Slip Condition Model
 
+    * Path tracking velocity = 0.25 m/s
+
+        <p align="center"><img src="images/no-slip-0.25-pos-kine-validate.png" alt="Double track image" /></p>
+
+        <p align="center"><img src="images/no-slip-0.25-orient-kine-validate.png" alt="Double track image" /></p>
+
+        <p align="center"><img src="images/no-slip-0.25-pos-error-kine-validate.png" alt="Double track image" /></p>
+
+        <p align="center"><img src="images/no-slip-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
+
     * Path tracking velocity = 0.5 m/s
 
+        <p align="center"><img src="images/no-slip-0.5-pos-kine-validate.png" alt="Double track image" /></p>
 
+        <p align="center"><img src="images/no-slip-0.5-orient-kine-validate.png" alt="Double track image" /></p>
 
-    * Path tracking velocity = 1.0 m/s
+        <p align="center"><img src="images/no-slip-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
 
+        <p align="center"><img src="images/no-slip-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
 
 **Conclusion:**
 

@@ -114,7 +114,7 @@ class DataSaverNode(Node):
             }
         }
         # Save the dictionary to a YAML file
-        with open("/home/sunny/FRA532_LAB1/src/ackermann_controller/yaml/no-slip-kinematics.yaml", "w") as f:
+        with open("/home/sunny/FRA532_LAB1/src/ackermann_controller/yaml/bicycle-kinematics0.25.yaml", "w") as f:
             yaml.dump(data, f)
         self.get_logger().info("Data saved to kinematics.yaml")
 

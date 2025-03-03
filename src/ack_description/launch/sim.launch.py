@@ -92,7 +92,7 @@ def generate_launch_description():
                 )
             ]
         ),
-        launch_arguments={"controller":"pid", "fk_model":"ground_truth", "ik_model":"ackermann"}.items()
+        launch_arguments={"controller":"pid", "fk_model":"ground_truth", "ik_model":"bicycle"}.items()
     )
 
     launch_description = LaunchDescription()

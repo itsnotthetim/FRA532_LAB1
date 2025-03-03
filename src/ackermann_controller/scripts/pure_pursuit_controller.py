@@ -96,7 +96,7 @@ class PurePursuit(Node):
         delta = math.atan2(2 * self.wheelbase * math.sin(alpha), self.lookahead_distance)
 
         # Convert Steering Angle to Angular Velocity (for `/cmd_vel`)
-        v = 1.0  # Constant speed (can be adjusted)
+        v = 0.25  # Constant speed (can be adjusted)
         w = (2 * v * math.sin(delta)) / self.wheelbase  # Approximate angular velocity
 
         # Check if the robot has reached the last waypoint
