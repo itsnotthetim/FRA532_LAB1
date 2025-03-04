@@ -278,9 +278,7 @@ $$
 
 To find the required steering angle $\delta$:
 
-$$
-\delta = \arctan\left(\frac{L \dot{\theta}}{v}\right)
-$$
+$$\delta = \arctan\left(\frac{L \dot{\theta}}{v}\right)$$
 
 #### 2.2 No-Slip Condition Model
 
@@ -292,21 +290,13 @@ $$
 
 **Key Equations**  
 
-$$
-\cot(\delta_L) - \cot(\delta_R) = \frac{TW}{WB}
-$$
+$$\cot(\delta_L) - \cot(\delta_R) = \frac{TW}{WB}$$
 
-$$
-\delta_{Ack} = \frac{\delta_{in}}{\gamma}
-$$
+$$\delta_{Ack} = \frac{\delta_{in}}{\gamma}$$
 
-$$
-\delta_L = \tan^{-1}\left( \frac{WB \cdot \tan(\delta_{Ack})}{WB + 0.5 \cdot TW \cdot \tan(\delta_{Ack})} \right)
-$$
+$$\delta_L = \tan^{-1}\left( \frac{WB \cdot \tan(\delta_{Ack})}{WB + 0.5 \cdot TW \cdot \tan(\delta_{Ack})} \right)$$
 
-$$
-\delta_R = \tan^{-1}\left( \frac{WB \cdot \tan(\delta_{Ack})}{WB - 0.5 \cdot TW \cdot \tan(\delta_{Ack})} \right)
-$$
+$$\delta_R = \tan^{-1}\left( \frac{WB \cdot \tan(\delta_{Ack})}{WB - 0.5 \cdot TW \cdot \tan(\delta_{Ack})} \right)$$
 
 Where:
 - $\delta_L$ and $\delta_R$ are the left and right wheel angles, respectively.
@@ -372,8 +362,7 @@ Forward kinematics models is using for calculate wheel speed into robot twist(at
 
 **Key Equations** 
 
-$$
-\begin{align*}
+$$\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -391,8 +380,7 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
 \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
 \end{bmatrix}
-\end{align*}
-$$
+\end{align*}$$
 
 #### 3.2 Single-Track Model
 
@@ -405,8 +393,7 @@ $$
 
 **Key Equations**
 
-$$
-\begin{align*}
+$$\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -424,8 +411,7 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
 \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
 \end{bmatrix}
-\end{align*}
-$$
+\end{align*}$$
 
 #### 3.3 Double-Track Model
 
@@ -437,8 +423,7 @@ $$
 
 **Key Equations**
 
-$$
-\begin{align*}
+$$\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -449,15 +434,14 @@ v_k \\
 \end{bmatrix}
 &=
 \begin{bmatrix}
-x_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
 y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
 \theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
 0 \\
 \frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\
 \frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
 \end{bmatrix}
-\end{align*}
-$$
+\end{align*}$$
 
 ---
 
@@ -592,24 +576,32 @@ This controller is the basic controller to implement in many systems, including 
 
 * **Cross-Track Error:**
     This is the perpendicular distance from the robot’s current position to the nearest point on the desired path. The equation is given by:
+
     $$CTE = \sqrt{(x_{closest} - x_{robot})^2 + (y_{closest} - y_{robot})^2}$$ 
+
     Where:
     * $x_{\text{robot}}$ and $y_{\text{robot}}$ are the coordinates of the robot's current position.
     * $x_{\text{closest}}$ and $y_{\text{closest}}$ are the coordinates of the closest point on the path.
 
 * **Proportional term:**
     Applies a correction proportional to the current error. The equation is given by:
+
     $$P = K_p \cdot e(t)$$
+
     Where $e(t)$ is the error at time $t$ and $K_p$ is the proportional gain.
 
 * **Integral term:**
     Accumulates past errors to eliminate residual steady-state error. The equation is given by:
+
     $$I = K_i \cdot \int_{0}^{t} e(\tau) \, d\tau$$
+
     Where $K_i$ is the integral gain.
 
 * **Derivative term:**
     Predicts future error based on the rate of change, helping to dampen the system. The equation is given by:
+
     $$D = K_d \cdot \frac{de(t)}{dt}$$
+    
     Where $K_d$ is the integral gain.
 
 * **Combinded PID controller law:**
