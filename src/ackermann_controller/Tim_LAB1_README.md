@@ -134,22 +134,22 @@ Where:
 
 # Variable Definitions
 
-- **\( $x_k$ \)** - The x-coordinate of the vehicle at time step \( k \).
-- **\( $y_k$ \)** - The y-coordinate of the vehicle at time step \( k \).
-- **\( $\theta_k$ \)** - The orientation (yaw angle) of the vehicle at time step \( k \).
-- **\( $\beta_k$ \)** - The sideslip angle (angle between the velocity vector and the longitudinal axis of the vehicle) at time step \( k \).
-- **\( $v_k$ \)** - The linear velocity of the vehicle at time step \( k \).
-- **\( $\omega_k$ \)** - The angular velocity (yaw rate) of the vehicle at time step \( k \).
-- **\( $\Delta t$ \)** - The discrete time step between \( k-1 \) and \( k \).
-- **\( $\beta_{k-1}$ \)** - The sideslip angle at the previous time step \( k-1 \).
-- **\( $\theta_{k-1}$ \)** - The orientation at the previous time step \( k-1 \).
-- **\( $v_{k-1}$ \)** - The linear velocity at the previous time step \( k-1 \).
-- **\( $\omega_{k-1}$ \)** - The angular velocity at the previous time step \( k-1 \).
-- **\( $\beta_R^*$ \)** - The effective rear slip angle of the vehicle.
-- **\( $v_{R,L,k}$ \)** - The velocity of the rear left wheel at time step \( k \).
-- **\( $v_{R,R,k}$ \)** - The velocity of the rear right wheel at time step \( k \).
-- **\( $r_b $\)** - The distance from the center of the rear axle to the vehicle's center of rotation.
-- **\( $\beta_F^* $ \)** - The effective front slip angle of the vehicle.
+- ** $x_k$ ** - The x-coordinate of the vehicle at time step  $k$ .
+- ** $y_k$ ** - The y-coordinate of the vehicle at time step  $k$ .
+- ** $\theta_k$ ** - The orientation (yaw angle) of the vehicle at time step $k$.
+- ** $\beta_k$ ** - The sideslip angle (angle between the velocity vector and the longitudinal axis of the vehicle) at time step $k$.
+- ** $v_k$ \)** - The linear velocity of the vehicle at time step $k$.
+- ** $\omega_k$ ** - The angular velocity (yaw rate) of the vehicle at time step $k$.
+- ** $\Delta t$ ** - The discrete time step between $k$ and $k$.
+- ** $\beta_{k-1}$ ** - The sideslip angle at the previous time step $k-1$.
+- ** $\theta_{k-1}$ ** - The orientation at the previous time step $k-1$.
+- ** $v_{k-1}$ ** - The linear velocity at the previous time step $k-1$.
+- ** $\omega_{k-1}$ ** - The angular velocity at the previous time step $k-1$.
+- ** $\beta_R^*$ ** - The effective rear slip angle of the vehicle.
+- ** $v_{R,L,k}$ ** - The velocity of the rear left wheel at time step $k$.
+- ** $v_{R,R,k}$ ** - The velocity of the rear right wheel at time step $k$.
+- ** $r_b $** - The distance from the center of the rear axle to the vehicle's center of rotation.
+- **$\beta_F^*$ ** - The effective front slip angle of the vehicle.
 
 
 ### 2.1 Yaw-Rate Model
