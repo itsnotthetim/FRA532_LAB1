@@ -74,7 +74,8 @@ To use this project. You need to have all of prerequisites for this project.
 
 #### Python packages
 
-⚠️ **Warning:** Make sure you have python version >= 3.6 already.
+[!WARNING]
+Make sure you have python version >= 3.6 already.
 
 *   numpy
 
@@ -571,7 +572,27 @@ To select the controllers that given by instruction(PID, Pure Pursuit, Linear MP
 
 This controller is the basic controller to implement in many systems, including this task path tracking controller. PID has main three terms to control system such as proportional, integral, and derivative. you can study more about this controller via this <a href="https://www.mathworks.com/discovery/pid-control.html">link</a>.
 
+We chose this controller because the environments that our robot faced was not difficult to run with PID controller. Additionally, PID controller can make robot tracking the path as well with cross track error.
+
 #### 2.1 Implementation
+
+PID controller need error of system, and the error of our robot is cross track error.
+
+**Cross track error**
+
+The cross-track error is calculated as the Euclidean distance between the robot's current position and the closest point on the path. The equation is given by:
+
+$$
+\text{CTE} = \sqrt{(x_{\text{closest}} - x_{\text{robot}})^2 + (y_{\text{closest}} - y_{\text{robot}})^2}
+$$
+
+Where:
+- \( x_{\text{robot}} \) and \( y_{\text{robot}} \) are the coordinates of the robot's current position.
+- \( x_{\text{closest}} \) and \( y_{\text{closest}} \) are the coordinates of the closest point on the path.
+
+
+
+
 
 #### 2.2 Results
 
