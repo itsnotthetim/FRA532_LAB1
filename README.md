@@ -452,7 +452,7 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 ---
 
 > [!NOTE]
-> The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_fk.py">forward kinematics script</a>).
+> The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_fk.py#L96-L114">forward kinematics script</a>).
 
 ```python
     def state_space(self):
