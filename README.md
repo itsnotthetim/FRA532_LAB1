@@ -425,11 +425,31 @@ $$
 
 - Double-Track model considers each wheel independently to make it more precise for odometry. By accounts for lateral wheel slips, load transfers, and individual wheel speeds. This is useful in high-accuracy odometry for vehicles with independent drive wheels or complex dynamics like four-wheeled mobile robots (ackerman model like we did). 
 
-**Key Equations**
+**Key Equations--**
 
-$$ {\left\lbrack \matrix{x_k \cr y_k \cr \theta_k \cr \beta_k \cr v_k \cr \omega_k} \right\rbrack}
-= {\left\lbrack \matrix{y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \cr y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \cr \theta_{k-1} + \omega_{k-1} \cdot \Delta t \cr 0 \cr \frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \cr \frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}} \right\rbrack}
 $$
+\begin{align*}
+\begin{bmatrix}
+x_k \\
+y_k \\
+\theta_k \\
+\beta_k \\
+v_k \\
+\omega_k
+\end{bmatrix}
+&=
+\begin{bmatrix}
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
+\beta_{R,k}^{\ast} \\
+\frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
+\quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
+\end{bmatrix}
+\end{align*}
+$$
+
+**Key Equations**
 
 $$
 \begin{align*}
@@ -449,6 +469,30 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 0 \\
 \frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\
 \frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
+\end{bmatrix}
+\end{align*}
+$$
+
+**Key Equations--**
+
+$$
+\begin{align*}
+\begin{bmatrix}
+x_k \\
+y_k \\
+\theta_k \\
+\beta_k \\
+v_k \\
+\omega_k
+\end{bmatrix}
+&=
+\begin{bmatrix}
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
+\beta_{R,k}^{\ast} \\
+\frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
+\quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
 \end{bmatrix}
 \end{align*}
 $$
