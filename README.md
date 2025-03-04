@@ -377,9 +377,9 @@ v_k \\
 y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
 y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
 \theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
-\beta_{R,k}^{\ast} \\
-\frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
-\quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
+0 \\
+\frac{v_{RL,k}^{\ast} + v_{RR,k}^{\ast}}{2} \\
+\omega_k^{\ast}
 \end{bmatrix}
 \end{align*}
 $$
@@ -392,8 +392,6 @@ $$
 
 - Single-Track model approximates a four-wheeled vehicle as a single-track system, treating both left and right wheels as one virtual wheel per axle. 
 - It simplifies kinematic calculations for estimating the vehicle's position and orientation to determine velocity and heading changes.
-
-$$\begin{align} {\left[\begin{array}{c} x_k\\ y_k\\ \theta _k\\ \beta _k\\ v_k\\ \omega _{k} \end{array}\right]} ={\left[\begin{array}{c}x_{k-1} + v_{k-1}\cdot \Delta t \cdot \cos \left(\beta _{k-1} + \theta _{k-1}+\frac{\omega _{k-1}\cdot \Delta t}{2} \right)\\ y_{k-1} + v_{k-1}\cdot \Delta t \cdot \sin \left(\beta _{k-1} + \theta _{k-1}+\frac{\omega _{k-1}\cdot \Delta t}{2}\right)\\ \theta _{k-1}+\omega _{k-1} \cdot \Delta t\\ \beta ^{*}_{R,k}\\ \frac{\tilde{v}_{RL,k}^\times +\tilde{v}_{RR,k}^\times }{2}\\ \frac{{v_{k-1}}}{r_{b}} \left(\cos (\beta ^{*}_{R,k}) \cdot (\tan (\beta ^{*}_{F,k})-\tan (\beta ^{*}_{R,k}))\right) \end{array} \right]} , \tag{15} \end{align}$$
 
 **Key Equations**
 
@@ -413,7 +411,7 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \f
 y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
 \theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
 \beta_{R,k}^{\ast} \\
-\frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
+\frac{v_{RL,k}^{\ast} + v_{RR,k}^{\ast}}{2} \\
 \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
 \end{bmatrix}
 \end{align*}
@@ -426,8 +424,6 @@ $$
 **Description**
 
 - Double-Track model considers each wheel independently to make it more precise for odometry. By accounts for lateral wheel slips, load transfers, and individual wheel speeds. This is useful in high-accuracy odometry for vehicles with independent drive wheels or complex dynamics like four-wheeled mobile robots (ackerman model like we did). 
-
-$\begin{align} {\left[\begin{array}{c} x_k\\ y_k\\ \theta _k\\ \beta _k\\ v_k\\ \omega _{k} \end{array}\right]} = {\left[\begin{array}{c}x_{k-1} + v_{k-1}\cdot \Delta t \cdot \cos \left(\beta _{k-1} + \theta _{k-1} + \frac{\omega _{k-1}\cdot \Delta t}{2} \right)\\ y_{k-1} + v_{k-1}\cdot \Delta t \cdot \sin \left(\beta _{k-1} +\theta _{k-1} +\frac{\omega _{k-1}\cdot \Delta t}{2}\right)\\ \theta _{k-1}+\omega _{k-1} \cdot \Delta t\\ 0\\ \frac{\tilde{v}_{RL,k}^\times +\tilde{v}_{RR,k}^\times }{2}\\ \omega ^{\times }_{k} \end{array}\right]} . \tag{17} \end{align}$
 
 **Key Equations**
 
@@ -448,18 +444,12 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
 0 \\
 \frac{v_{RL,k}^{\ast} + v_{RR,k}^{\ast}}{2} \\
-\frac{v_{RR,k}^{\ast} - v_{RL,k}^{\ast}}{TW}
+\frac{v_{RR,k}^{\ast} - v_{RL,k}^{\ast}}{r_{RR,y} - r_{RL,y}}
 \end{bmatrix}
 \end{align*}
 $$
 
-**Key Equations--**
-
-$$
-\begin{align} {\left[\begin{array}{c} x_k\\ y_k\\ \theta _k\\ \beta _k\\ v_k\\ \omega _{k} \end{array} \right]} = {\left[\begin{array}{c}x_{k-1} + v_{k-1}\cdot \Delta t \cdot \cos \left(\beta _{k-1} + \theta _{k-1}+\frac{\omega _{k-1}\cdot \Delta t}{2}\right)\\ y_{k-1} + v_{k-1}\cdot \Delta t \cdot \sin \left(\beta _{k-1} + \theta _{k-1}+\frac{\omega _{k-1}\cdot \Delta t}{2} \right)\\ \theta _{k-1}+\omega _{k-1} \cdot \Delta t\\ 0\\ \frac{\tilde{v}_{RL,k}^\times +\tilde{v}_{RR,k}^\times }{2}\\ \frac{\tilde{v}_{RR,k}^\times -\tilde{v}_{RL,k}^\times }{(r_{RR,y}-r_{RL,y})} \end{array} \right]} . \tag{7} \end{align}
-$$
-
-For all equations, this is variable definitions.
+For all forward kinematics equations, this is variable definitions.
 - $x_k$ - The x-coordinate of the vehicle at time step  $k$ .
 - $y_k$ - The y-coordinate of the vehicle at time step  $k$ .
 - $\theta_k$ - The orientation (yaw angle) of the vehicle at time step $k$.
