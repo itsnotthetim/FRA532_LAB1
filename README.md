@@ -924,7 +924,7 @@ $$Z_k = \begin{bmatrix} x_k^m \\ y_k^m \end{bmatrix} + v_k$$
 
    $$P_k = (I - K_k H_k) P_k$$
 
-   where $H_k$ is the Jacobian of the measurement function ($h(X_k)$), and $K_k$ is the **Kalman Gain**.
+   where $H_k$ is the Jacobian of the measurement function $(h(X_k))$, and $K_k$ is the **Kalman Gain**.
 
 ### 4 Understanding Matrix Q and R
 
@@ -950,7 +950,7 @@ Q =
 $$
 
 where:
--  $\sigma_x^2 $ and  $\sigma_y^2 $ represent **position uncertainty** (meters²),
+-  $\sigma_x^2$ and  $\sigma_y^2$ represent **position uncertainty** (meters²),
 -  $\sigma_\theta^2$  represents **heading uncertainty** (radians²).
 
 #### 4.2 Measurement Noise Covariance Matrix (R)
