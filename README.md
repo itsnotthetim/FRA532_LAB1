@@ -311,9 +311,9 @@ Where:
 - $\delta_L$ and $\delta_R$ are the left and right wheel angles, respectively.
 - $\delta_{Ack}$ is the Ackermann angle.
 - $\delta_{in} $ is the input steering angle.
-- $ \gamma$ is a scaling factor.
+- $\gamma$ is a scaling factor.
 - $TW$ is the track width (distance between the left and right wheels).
-- $ WB $ $is the wheelbase (distance between the front and rear axles).
+- $WB$ $is the wheelbase (distance between the front and rear axles).
 - $P_{Ack}$ is the Ackermann percentage.
 
 ---
@@ -509,8 +509,6 @@ The results for each model are shown in the following graphs below:
 
         <p align="center"><img src="images/lab1.1/validation/Bicycle-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
 
-        ---h tracking controller or local planner is the algorithm to tracking the path that given from somewhere like global planner. The goal of this algorithm is based on what mission robot need to do, in
-
     * Path tracking velocity = 0.5 m/s
 
         <p align="center"><img src="images/lab1.1/validation/Bicycle-0.5-pos-kine-validate.png" alt="Double track image" /></p>
@@ -578,31 +576,130 @@ To select the controllers that given by instruction(PID, Pure Pursuit, Linear MP
 2. The need for smoothness of the robot in following the path.
 3. How difficult is it to implement?
 
+> [!NOTE]
+> To test the controller we use <a href="#21-bicycle-model">bicycle model</a> and ground truth odometry to be our inverse and forward kinematics model.
+
 ### 2 PID controller
 
-This controller is the basic controller to implement in many systems, including this task path tracking controller. PID has main three terms to control system such as proportional, integral, and derivative. you can study more about this controller via this <a href="https://www.mathworks.com/discovery/pid-control.html">link</a>.
+This controller is the basic controller to implement in many systems, including this task path tracking controller. PID has main three terms to control system such as proportional, integral, and derivative.
+
+**Key Concepts**
+
+* **Cross-Track Error:**
+    This is the perpendicular distance from the robot’s current position to the nearest point on the desired path. The equation is given by:
+
+    $$
+    \text{CTE} = \sqrt{(x_{\text{closest}} - x_{\text{robot}})^2 + (y_{\text{closest}} - y_{\text{robot}})^2}
+    $$
+
+    Where:
+    - $x_{\text{robot}}$ and $y_{\text{robot}}$ are the coordinates of the robot's current position.
+    - $x_{\text{closest}}$ and $y_{\text{closest}}$ are the coordinates of the closest point on the path.
+
+* **Proportional term:**
+    Applies a correction proportional to the current error. The equation is given by:
+
+    $$P = K_p \cdot e(t)$$
+
+    Where $e(t)$ is the error at time $t$ and $K_p$ is the proportional gain.
+
+* **Integral term:**
+    Accumulates past errors to eliminate residual steady-state error. The equation is given by:
+
+    $$I = K_i \cdot \int_{0}^{t} e(\tau) \, d\tau$$
+
+    Where $K_i$ is the integral gain.
+
+* **Derivative term:**
+    Predicts future error based on the rate of change, helping to dampen the system. The equation is given by:
+
+    $$D = K_d \cdot \frac{de(t)}{dt}$$
+
+    Where $K_d$ is the integral gain.
+
+* **Combinded PID controller law:**
+
+    $$u(t) = K_p \cdot e(t) + K_i \cdot \int_{0}^{t} e(\tau) \, d\tau + K_d \cdot \frac{de(t)}{dt}$$
+
+> [!NOTE]
+> You can study more about this controller via this <a href="https://thomasfermi.github.io/Algorithms-for-Automated-Driving/Control/PID.html">link</a>.
 
 We chose this controller because the environments that our robot faced was not difficult to run with PID controller. Additionally, PID controller can make robot tracking the path as well with cross track error.
 
 #### 2.1 Implementation
 
-PID controller need error of system, and the error of our robot is cross track error.
+According to the key concepts. We implement the PID controller, cross-track error calculation, and steering angle via this code.
 
-**Cross track error**
+* **PID controller:**
 
-The cross-track error is calculated as the Euclidean distance between the robot's current position and the closest point on the path. The equation is given by:
+    ```python
+    def update_controller(self, error, sat):
+        """
+        Updates PID controller output based on error input.
+        
+        Args:
+            error: Current error (setpoint - measured_value)
+            at: Output saturation limits (±sat)
+        
+        Returns:
+            float: Controller output
+        """
+        e_n = error  # Current error sample
 
-$$
-\text{CTE} = \sqrt{(x_{\text{closest}} - x_{\text{robot}})^2 + (y_{\text{closest}} - y_{\text{robot}})^2}
-$$
+        # Anti-windup logic:
+        # Only update controller if:
+        # 1. Output is not saturated, or
+        # 2. Error is trying to reduce the output
+        if not ((self.y_n >= sat and e_n > 0) or (self.y_n <= -sat and e_n < 0)):
+            # PID equation in discrete form:
+            self.y_n += ((self.kp + self.ki + self.kd) * e_n) - ((self.kp + (2 * self.kd)) * self.e_n_1) + (self.kd * self.e_n_2)
 
-Where:
-- \( x_{\text{robot}} \) and \( y_{\text{robot}} \) are the coordinates of the robot's current position.
-- \( x_{\text{closest}} \) and \( y_{\text{closest}} \) are the coordinates of the closest point on the path.
+        # Update error history for next iteration
+        self.e_n_2 = self.e_n_1
+        self.e_n_1 = e_n
+        self.e_n = e_n
+        
+        # Saturate output to prevent excessive control signals
+        if self.y_n > sat:
+            self.y_n = sat
+        elif self.y_n < -sat:
+            self.y_n = -sat
 
+        return self.y_n
+    ```
 
+* **cross-track error calculation:**
 
+    ```python
+    def get_cte(self, robot_x, robot_y, path_x, path_y, last_index, maxsearch_index=50, goal_threshold=0.5):
+        # Convert path points to numpy arrays
+        path_points = np.column_stack((path_x[last_index:(last_index+maxsearch_index+1)], path_y[last_index:(last_index+maxsearch_index+1)]))
+        robot_pos = np.array([robot_x, robot_y])
 
+        # Compute Euclidean distances from robot to all path points
+        distances = np.linalg.norm(path_points - robot_pos, axis=1)
+
+        # Find the closest path point
+        min_index = np.argmin(distances)
+        closest_point = path_points[min_index]
+        
+        # Compute CTE as Euclidean distance
+        cte = float(distances[min_index])
+        goal_reached = (last_index == len(path_x) - 1) and (cte < goal_threshold)
+
+        last_index += min_index
+
+        return cte, last_index, goal_reached
+    ```
+
+* **Steering angle:**
+
+    ```python
+    angular_z = float(self.ang_pid.update_controller(error_long, 5))
+    ```
+
+> [!NOTE]
+> You can check the PID controller node in this <a href="src/ackermann_controller/scripts/pid_controller.py">file</a>.
 
 #### 2.2 Results
 
@@ -612,9 +709,63 @@ To run this controller, you can follow this command below:
 ros2 run ackermann_controller pid_controller.py
 ```
 
+* Slow velocity (0.25 m/s)
+
+<p align="center"><img src="images/lab1.2/validation/" alt="PID controller Result slow velocity" /></p>
+
+* Fast velocity (0.5 m/s)
+
+<p align="center"><img src="images/lab1.2/validation/" alt="PID controller Result fast velocity" /></p>
+
 ### 3 Pure Pursuit controller
 
+This controller is is a geometric method used for path tracking in autonomous vehicles and mobile robots. Its main goal is to generate steering commands that guide the vehicle along a predefined path.
+
+**Key Concepts**
+
+* **Lookahead Point:**
+    The controller identifies a target point on the path a fixed distance (lookahead distance) ahead of the vehicle. This distance is often chosen based on the vehicle's speed and desired responsiveness.
+
+* **Geometric Relationship:**
+    The controller computes the curvature required to steer the vehicle toward the lookahead point. Essentially, it draws a virtual circle passing through the vehicle’s current position and the lookahead point.
+
+* **Steering Angle Calculation:**
+    The required steering angle is determined by the curvature of the circle. The curvature $\kappa$ is given by:
+
+    $$\kappa = \frac{2 \sin(\alpha)}{L_d}$$
+
+    where:
+
+    * $\alpha$ is the angle between the vehicle's heading and the line connecting it to the lookahead point.
+
+    * $L_d$ is the lookahead distance.
+
+
+> [!NOTE]
+> You can study more about this controller via this <a href="https://thomasfermi.github.io/Algorithms-for-Automated-Driving/Control/PurePursuit.html">link</a>.
+
+We chose this controller because it is straightforward to implement and works well on smooth paths.
+
 #### 3.1 Implementation
+
+According to the key concepts. We calculate the heading error, steering angle via this code.
+
+* **Heading error:**
+
+    ```python
+    alpha = target_angle - self.yaw
+    ```
+
+* **Steering angle:**
+
+    ```python
+    delta = math.atan2(2 * self.wheelbase * math.sin(alpha), self.lookahead_distance)
+    v = 0.5 # Linear velocity
+    w = (2 * v * math.sin(delta)) / self.wheelbase # Angular velocity
+    ```
+
+> [!NOTE]
+> You can check the Pure Pursuit controller node in this <a href="src/ackermann_controller/scripts/pure_pursuit_controller.py">file</a>.
 
 #### 3.2 Results
 
@@ -624,9 +775,76 @@ To run this controller, you can follow this command below:
 ros2 run ackermann_controller pure_pursuit_controller.py
 ```
 
+* Slow velocity (0.25 m/s)
+
+<p align="center"><img src="images/lab1.2/validation/" alt="Pure Pursuit controller Result slow velocity" /></p>
+
+* Fast velocity (0.5 m/s)
+
+<p align="center"><img src="images/lab1.2/validation/" alt="Pure Pursuit controller Result fast velocity" /></p>
+
 ### 4 Stanley controller
 
+This controller is a widely used algorithm for path tracking in autonomous vehicles. Developed at Stanford University, it focuses on minimizing the vehicle's lateral error relative to a predefined path.
+
+**Key Concepts:**
+
+* **Cross-Track Error:**
+    This is the perpendicular distance from the vehicle’s current position to the nearest point on the desired path. (<a href="#2-pid-controller">Same as PID controller concepts</a>)
+
+* **Heading Error:**
+    The difference between the vehicle's current heading and the tangent (direction) of the path at the nearest point.
+
+* **Steering Command Calculation:**
+    The Stanley controller computes the steering angle ($\delta$) by combining the heading error with a term that accounts for the cross-track error. The typical formula is:
+
+    $$\delta = \theta_e + \arctan\left(\frac{k \cdot e}{v}\right)$$
+
+    Where:
+
+    * $\theta_e$ is the heading error.
+    * $e$ is the cross-track error.
+    * $k$ is a tuning parameter that adjusts the controller's sensitivity.
+    * $v$ is the vehicle's current speed.
+
+> [!NOTE]
+> You can study more about this controller via this <a href="https://www.ri.cmu.edu/pub_files/2009/2/Automatic_Steering_Methods_for_Autonomous_Automobile_Path_Tracking.pdf">link</a>.
+
+We chose this controller because it is performs well under a variety of conditions and is especially effective for tracking smooth paths. Additionally, Its geometric approach makes the controller straightforward to implement.
+
 #### 4.1 Implementation
+
+According to the key concepts. We calculate the heading error, cross-track error, Stanley control law, and Steering Angle via this code.
+
+* **Heading error:**
+
+    ```Python
+    heading_error = path_heading - self.yaw
+    heading_error = math.atan2(math.sin(heading_error), math.cos(heading_error))
+    ```
+
+* **Cross-Track error:**
+
+    ```Python
+    cross_track_error = math.sqrt(dx ** 2 + dy ** 2)
+    sign = -1 if math.sin(self.yaw) * dx - math.cos(self.yaw) * dy > 0 else 1
+    cross_track_error *= sign
+    ```
+
+* **Stanley control law:**
+
+    ```Python
+    steering_angle = heading_error + math.atan2(self.k * cross_track_error, self.velocity)
+    steering_angle = max(min(steering_angle, math.pi / 4), -math.pi / 4)
+    ```
+* **Steering angle:**
+
+    ```Python
+    angular_velocity = (2 * self.velocity * math.sin(steering_angle)) / self.wheelbase
+    ```
+
+> [!NOTE]
+> You can check the Stanley controller node in this <a href="src/ackermann_controller/scripts/stanley_controller.py">file</a>.
 
 #### 4.2 Results
 
@@ -635,6 +853,14 @@ To run this controller, you can follow this command below:
 ```
 ros2 run ackermann_controller 
 ```
+
+* Slow velocity (0.25 m/s)
+
+<p align="center"><img src="images/lab1.2/validation/" alt="Stanley controller Result slow velocity" /></p>
+
+* Fast velocity (0.5 m/s)
+
+<p align="center"><img src="images/lab1.2/validation/" alt="Stanley controller Result fast velocity" /></p>
 
 ### 5 Conclusion
 
