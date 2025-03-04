@@ -1,6 +1,6 @@
 # FRA532 LAB1
 
-<p align="center"><img src="images/gazebo_purepursuit.gif" alt="Overview .gif" /></p>
+<p align="center"><img src="images/introduction/gazebo_purepursuit.gif" alt="Overview .gif" /></p>
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
@@ -142,7 +142,7 @@ Follow the command below to dowload and install package.
 <!-- USAGE -->
 ## Usage
 
-⚠️  **Warning:**    Before use this project you need to `source ~/FRA532_LAB1/install/setup.bash` and `source /opt/ros/humble/setup.bash` everytime that you open new terminal. If you want to make sure that 2 path has been source everytime when open new terminal you can follow the command below and next time you open new terminal .bashrc will source everything you write on that file.
+⚠️  **Warning:** Before use this project you need to `source ~/FRA532_LAB1/install/setup.bash` and `source /opt/ros/humble/setup.bash` everytime that you open new terminal. If you want to make sure that 2 path has been source everytime when open new terminal you can follow the command below and next time you open new terminal .bashrc will source everything you write on that file.
 
 ```
 echo "source ~/FRA532_LAB1/install/setup.bash" >> ~/.bashrc
@@ -158,7 +158,9 @@ ros2 launch ack_description sim.launch.py
 
 After launch the project, rviz2 and gazebo window will show up on your screen with ackermann robot in gazebo world like this picture below.
 
-<p align="center"><img src="images/launch_sim.png" alt="After launch project" /></p>
+<p align="center"><img src="images/introduction/launch_sim.png" alt="After launch project" /></p>
+
+**You can selected/changed the kinematics model and other parameters/arguments via <a href="src/ack_description/launch/sim.launch.py">this</a> launch file.**
 
 ### Run the controller node
 
@@ -188,17 +190,17 @@ This section provided robot model with inverse and forward kinematics for simula
 
 Robot description is the part that have to use for visualize in rviz and simulate in gazebo. You can check our robot description <a href="src/ack_description/urdf/robot.xacro">here</a>.
 
-<p align="center"><img src="images/robot_model.png" alt="Robot model" /></p>
+<p align="center"><img src="images/lab1.1/information/robot_model.png" alt="Robot model" /></p>
 
 This model is based on intruction of this lab, see below.
 
-<p align="center"><img src="images/model_instruction.png" alt="Model instuction" /></p>
+<p align="center"><img src="images/lab1.1/information/model_instruction.png" alt="Model instuction" /></p>
 
 Additionaly, for <a href="#31-yaw-rate-model">Yaw-Rate Model</a> we add imu sensor frame (yellow cylinder on the head) to simulate imu sensor and link it into gazebo.
 
 #### 1.2 Transformation
 
-<p align="center"><img src="images/tf.png" alt="Robot model" /></p>
+<p align="center"><img src="images/lab1.1/information/tf.png" alt="TF" /></p>
 
 The transformation tree is:
 
@@ -228,7 +230,7 @@ And after we create robot odometry transformation tree will change into this:
 
 If we use `view frame` of `tf2_tools`, the result is a image below.
 
-<p align="center"><img src="images/tf_viewframe.png" alt="tf_viewframe" /></p>
+<p align="center"><img src="images/lab1.1/information/tf_viewframe.png" alt="tf_viewframe" /></p>
 
 ### 2. Inverse Kinematics Models
 
@@ -236,7 +238,7 @@ Inverse kinematics models is using for calculate twist at robot frame into wheel
 
 #### 2.1 Bicycle Model
 
-<p align="center"><img src="images/BicycleModelGeometry.png" alt="bicycle model image" /></p>
+<p align="center"><img src="images/lab1.1/information/BicycleModelGeometry.png" alt="bicycle model image" /></p>
 
 **Description**  
 
@@ -265,7 +267,7 @@ $$
 
 #### 2.2 No-Slip Condition Model
 
-<p align="center"><img src="images/No-slip_steering_ack_model.png" alt="no slip image" /></p>
+<p align="center"><img src="images/lab1.1/information/No-slip_steering_ack_model.png" alt="no slip image" /></p>
 
 **Description**  
 - Assumes that wheels roll without slipping, meaning all wheels must share the same turning center.  
@@ -300,7 +302,7 @@ Where:
 
 ---
 
-⚠️ *In case, the code for the Bicycle model and the No-Slip Condition Constraints model shares similar equations, the implementation will be mostly the same, with some differences specific to each model. The code will look like this.*
+⚠️ *In case, the code for the Bicycle model and the No-Slip Condition Constraints model shares similar equations, the implementation will be mostly the same, with some differences specific to each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_ik.py">inverse kinematics script</a>).*
 
 ```python 
     def cmd_vel_callback(self, msg: Twist):
@@ -339,7 +341,7 @@ Forward kinematics models is using for calculate wheel speed into robot twist(at
 
 #### 3.1 Yaw-Rate Model
 
-<p align="center"><img src="images/Yaw-Rate-fk.png" alt="yaw rate image" /></p>
+<p align="center"><img src="images/lab1.1/information/Yaw-Rate-fk.png" alt="yaw rate image" /></p>
 
 **Description**
 
@@ -371,7 +373,7 @@ $$
 
 #### 3.2 Single-Track Model
 
-<p align="center"><img src="images/Single-Track-fk.png" alt="single track image" /></p>
+<p align="center"><img src="images/lab1.1/information/Single-Track-fk.png" alt="single track image" /></p>
 
 **Description**
 
@@ -402,7 +404,7 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 #### 3.3 Double-Track Model
 
-<p align="center"><img src="images/Double-track-fk.png" alt="Double track image" /></p>
+<p align="center"><img src="images/lab1.1/information/Double-track-fk.png" alt="Double track image" /></p>
 
 **Description**
 
@@ -418,21 +420,7 @@ y_k \\
 \beta_k \\
 v_k \\
 \omega_k
-\end{bmatrix}
-&=
-\begin{bmatrix}
-x_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
-0 \\
-\frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\
-\frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
-\end{bmatrix}
-\end{align*}$$
-
----
-
-⚠️ *The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this:*
+\end{bmatrix}h tracking controller or local planner is the algorithm to tracking the path that given from somewhere like global planner. The goal of this algorithm is based on what mission robot need to do, in
 
 ```python
     def state_space(self):
@@ -477,25 +465,25 @@ The results for each model are shown in the following graphs below:
 
     * Path tracking velocity = 0.25 m/s
 
-        <p align="center"><img src="images/Bicycle-0.25-pos-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/Bicycle-0.25-pos-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/Bicycle-0.25-orient-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/Bicycle-0.25-orient-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/Bicycle-0.25-pos-error-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/Bicycle-0.25-pos-error-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/Bicycle-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/Bicycle-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
 
-        ---
+        ---h tracking controller or local planner is the algorithm to tracking the path that given from somewhere like global planner. The goal of this algorithm is based on what mission robot need to do, in
 
     * Path tracking velocity = 0.5 m/s
 
-        <p align="center"><img src="images/Bicycle-0.5-pos-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/Bicycle-0.5-pos-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/Bicycle-0.5-orient-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/Bicycle-0.5-orient-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/Bicycle-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/Bicycle-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/Bicycle-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/Bicycle-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
 
         ---
 
@@ -503,33 +491,33 @@ The results for each model are shown in the following graphs below:
 
     * Path tracking velocity = 0.25 m/s
 
-        <p align="center"><img src="images/no-slip-0.25-pos-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/no-slip-0.25-pos-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/no-slip-0.25-orient-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/no-slip-0.25-orient-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/no-slip-0.25-pos-error-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/no-slip-0.25-pos-error-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/no-slip-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/no-slip-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
 
         ---
 
     * Path tracking velocity = 0.5 m/s
 
-        <p align="center"><img src="images/no-slip-0.5-pos-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/no-slip-0.5-pos-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/no-slip-0.5-orient-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/no-slip-0.5-orient-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/no-slip-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/no-slip-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
 
-        <p align="center"><img src="images/no-slip-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
+        <p align="center"><img src="images/lab1.1/validation/no-slip-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
 
         ---
 
-**Conclusion:**
+### 5. Conclusion
 
 
 
-### 5. Model selection guide
+**Model selection guide**
 
 - **Inverse Kinematics**  
   - **Bicycle Model**: Best for simple path-following and control.  
@@ -695,7 +683,7 @@ self.R = np.diag([0.0025, 0.0025])  # Fixed measurement noise covariance
 
 - The EKF trusts GPS moderately but filters out small fluctuations.
 
-## Implementation
+### Implementation
 
 This code is in <a href="src/ackermann_controller/scripts/ekf_node.py">ekf_node.py</a>.
 
@@ -821,81 +809,75 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
 ```
 
-### Sample results from this ekf_node.
+### Results without tuning.
 
-#### Yaw-Rate EKF
+1. Yaw-Rate EKF
 
-<p align="center"><img src="images/tf_viewframe.png" alt="tf_viewframe" /></p>
+<p align="center"><img src="images/lab1.3/validation/ekf_yaw_figure.png" alt="tf_viewframe" /></p>
 
-#### Single-Track EKF
+2. Single-Track EKF
 
-<p align="center"><img src="images/tf_viewframe.png" alt="tf_viewframe" /></p>
+<p align="center"><img src="images/lab1.3/validation/ekf_s_figure.png" alt="tf_viewframe" /></p>
 
-#### Double-Track EKF
+3. Double-Track EKF
 
-<p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
+<p align="center"><img src="images/lab1.3/validation/ekf_init_db_validation_figure.png" alt="tf_viewframe" /></p>
 
 ### Tuning Configurations and Results
 
-We tested five different settings for **Q** with Ackerman steering type: Double-track model via Pure Pursuit Algorithm and recorded the errors for demonstrated how to tune the matrix Q. Here are the results:
+We tested five different settings for **Q** with Ackerman steering type: <a href="#33-double-track-model">Double-track model</a> via <a href="#pure-pursuit-controller">Pure Pursuit controller</a> and recorded the errors for demonstrated how to tune the matrix Q. Here are the results:
 
 #### 1. Initial Configuration 
 
-![Initial Figure](figures/ekf_init_db_validation_figure.png)
+<p align="center"><img src="images/lab1.3/validation/ekf_init_db_validation_figure.png" alt="Initial Figure" /></p>
+
 - **Q**: `np.diag([0.01, 0.01, 0.01])`
 - **Mean Position Error**: `0.1665 m`
 - **Mean Yaw Error**: `0.1631 rad`
 
-![Initial Configuration](ekf_mean_error_img/db_init.png)
-
----
+<p align="center"><img src="images/lab1.3/information/db_init.png" alt="Initial Configuration" /></p>
 
 #### 2. First Decrease in Q 
 
-![First Decrease Figure](figures/ekf_dec1_db_validation_figure.png)
+<p align="center"><img src="images/lab1.3/validation/ekf_dec1_db_validation_figure.png" alt="First Decrease Figure" /></p>
+
 - **Q**: `np.diag([0.001, 0.001, 0.001])`
 - **Mean Position Error**: `0.0768 m`
 - **Mean Yaw Error**: `0.0819 rad`
 
-![First Decrease in Q](ekf_mean_error_img/db_dec1.png)
-
----
+<p align="center"><img src="images/lab1.3/information/db_dec1.png" alt="First Decrease in Q" /></p>
 
 #### 3. Second Decrease in Q 
 
-![Second Decrease Figure](figures/ekf_dec2_db_validation_figure.png)
+<p align="center"><img src="images/lab1.3/validation/ekf_dec2_db_validation_figure.png" alt="Second Decrease Figure" /></p>
+
 - **Q**: `np.diag([0.0001, 0.0001, 0.0001])`
 - **Mean Position Error**: `0.0909 m`
 - **Mean Yaw Error**: `0.0671 rad`
 
-![Second Decrease in Q](ekf_mean_error_img/db_dec2.png)
-
----
+<p align="center"><img src="images/lab1.3/information/db_dec2.png" alt="Second Decrease in Q" /></p>
 
 #### 4. First Adjustment (`db_adj1.png`)
 
-![First Adjustment Figure](figures/ekf_adj1_db_validation_figure.png)
+<p align="center"><img src="images/lab1.3/validation/ekf_adj1_db_validation_figure.png" alt="First Adjustment Figure" /></p>
+
 - **Q**: `np.diag([0.001, 0.001, 0.0001])`
 - **Mean Position Error**: `0.0668 m`
 - **Mean Yaw Error**: `0.0644 rad`
 
-![First Adjustment](ekf_mean_error_img/db_adj1.png)
-
----
+<p align="center"><img src="images/lab1.3/information/db_adj1.png" alt="First Adjustment" /></p>
 
 #### 5. Second Adjustment (`db_adj2.png`)
 
-![Second Adjustment Figure](figures/ekf_adj2_db_validation_figure.png)
+<p align="center"><img src="images/lab1.3/validation/ekf_adj2_db_validation_figure.png" alt="Second Adjustment Figure" /></p>
+
 - **Q**: `np.diag([0.0005, 0.0005, 0.0002])`
 - **Mean Position Error**: `0.0625 m`
 - **Mean Yaw Error**: `0.0513 rad`
 
-![Second Adjustment](ekf_mean_error_img/db_adj2.png)
-
----
+<p align="center"><img src="images/lab1.3/information/db_adj2.png" alt="Second Adjustment" /></p>
 
 ### Interpretation
 
@@ -926,9 +908,11 @@ We tested five different settings for **Q** with Ackerman steering type: Double-
 - **Tuning Q**: Finding the right balance for **Q** is key to making the EKF work well.
 - **Best Setting**: The setting `np.diag([0.0005, 0.0005, 0.0002])` gave closer the optimal result.
 
+<p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
+
 ## Contributors
 
 1. **Nakarin Jettanatummajit** (65340500033)
-2. **Timmy** (653405000xx)
+2. **Karanyaphas Chitsuebsai** (65340500065)
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>

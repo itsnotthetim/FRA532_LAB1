@@ -13,7 +13,7 @@ class EKFLocalization(Node):
         super().__init__('ekf_localization')
 
         # Subscribe to odometry and GPS
-        self.odom_sub = self.create_subscription(Odometry, 'single_track/odom', self.odom_callback, 10)
+        self.odom_sub = self.create_subscription(Odometry, '/yaw_rate/odom', self.odom_callback, 10)
         self.gps_sub = self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
 
         # Publisher for fused odometry
@@ -23,14 +23,17 @@ class EKFLocalization(Node):
         self.x_est = np.array([0.0, 0.0, 0.0])  # Initial estimate
         self.P_est = np.eye(3) * 1.0  # Initial covariance matrix
 
-        # Process noise covariance (Q) - adjustable
-        self.process_noise = 0.5
-        self.Q = np.eye(3) * self.process_noise
+        # Process and measurement noise covariance matrices
+        
+        self.R = np.diag([0.025, 0.025])  # Based on GPS measurement noise
 
-        # Measurement noise covariance (R) - adjustable
-        self.measurement_noise = 0.5
-        self.R = np.eye(2) * self.measurement_noise
-
+       
+        self.Q = np.diag([0.01, 0.01, 0.01]) 
+        # self.Q = np.diag([0.001, 0.001, 0.001])
+        # self.Q = np.diag([0.0001, 0.0001, 0.0001])  
+        # self.Q = np.diag([0.001, 0.001, 0.0001]) 
+        # self.Q = np.diag([0.0005, 0.0005, 0.0002]) 
+        
         # Time step
         self.dt = 0.01
 
