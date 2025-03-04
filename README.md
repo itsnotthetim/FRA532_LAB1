@@ -192,7 +192,8 @@ Example: To run the pure pursuit controller you can use this command below.
 ros2 run ackermann_controller pure_pursuit_controller.py
 ```
 
-This step will explain more in <a href="#path-tracking-controller">Lab 1.2</a> section.
+> [!NOTE]
+> This step will explain more in <a href="#path-tracking-controller">Lab 1.2</a> section.
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
