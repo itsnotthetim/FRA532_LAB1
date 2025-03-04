@@ -8,6 +8,7 @@ from tf_transformations import euler_from_quaternion
 import yaml
 import numpy as np
 from ament_index_python.packages import get_package_share_directory
+from std_msgs.msg import Bool
 
 class PID_controller:
     """
@@ -105,6 +106,9 @@ class PIDControllerNode(Node):
         self.cte_index = 0
         self.goal_reached = False
 
+        # Publish reached goal
+        self.reached_goal_pub = self.create_publisher(Bool, "/reached_goal", 10)
+
     def get_cte(self, robot_x, robot_y, path_x, path_y, last_index, maxsearch_index=50, goal_threshold=0.5):
         # Convert path points to numpy arrays
         path_points = np.column_stack((path_x[last_index:(last_index+maxsearch_index+1)], path_y[last_index:(last_index+maxsearch_index+1)]))
@@ -155,6 +159,7 @@ class PIDControllerNode(Node):
         angular_z = float(self.ang_pid.update_controller(error_long, 5))
 
         if self.reached_goal == True:
+            self.reached_goal_pub.publish(Bool(data=True))
             linear_x = 0.0
             angular_z = 0.0
             msg = Twist()
@@ -171,6 +176,7 @@ class PIDControllerNode(Node):
         msg.linear.x = linear_x
         msg.angular.z = angular_z
         self.cmd_vel_publisher.publish(msg)
+        self.reached_goal_pub.publish(Bool(data=False))
 
         self.get_logger().info(f"Error: {error_long}, {error_ang}")
         self.get_logger().info(f"Position: {x}, {y}")

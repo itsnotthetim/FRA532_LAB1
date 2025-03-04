@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
@@ -7,6 +9,7 @@ import yaml
 import os
 from pathlib import Path
 from ament_index_python.packages import get_package_share_directory
+from std_msgs.msg import Bool
 
 class StanleyController(Node):
     def __init__(self):
@@ -16,6 +19,7 @@ class StanleyController(Node):
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.subscription = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
         self.timer = self.create_timer(0.01, self.stanley_control)  # Run control loop at 100 Hz
+        self.reached_goal_pub = self.create_publisher(Bool, "/reached_goal", 10)
 
         # Load Waypoints from YAML File
         package_name = "ackermann_controller"  # Your package name
@@ -44,7 +48,7 @@ class StanleyController(Node):
         self.get_logger().info(f"Loaded {len(waypoints)} waypoints from {file_path}")
         return waypoints
 
-    def odom_callback(self, msg):
+    def odom_callback(self, msg:Odometry):
         """Extract position and yaw from odometry data."""
         self.position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
 
@@ -109,6 +113,7 @@ class StanleyController(Node):
             final_distance = math.sqrt(final_dx ** 2 + final_dy ** 2)
 
             if final_distance < 0.1:  # Threshold to determine if the goal is reached
+                self.reached_goal_pub.publish(Bool(data=True))
                 self.get_logger().info("Final waypoint reached. Stopping the robot.")
                 self.stop_robot()
                 self.shutdown_node()
@@ -119,6 +124,7 @@ class StanleyController(Node):
         msg.linear.x = self.velocity
         msg.angular.z = angular_velocity
         self.publisher.publish(msg)
+        self.reached_goal_pub.publish(Bool(data=False))
 
         # Debugging Log
         self.get_logger().info(f'Waypoint: ({goal_x}, {goal_y}), Heading Error: {heading_error:.3f}, Cross-Track Error: {cross_track_error:.3f}')

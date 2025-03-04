@@ -573,14 +573,37 @@ This controller is the basic controller to implement in many systems, including 
 
 #### 2.1 Implementation
 
+#### 2.2 Results
+
+To run this controller, you can follow this command below:
+
+```
+ros2 run ackermann_controller pid_controller.py
+```
 
 ### 3 Pure Pursuit controller
 
 #### 3.1 Implementation
 
+#### 3.2 Results
+
+To run this controller, you can follow this command below:
+
+```
+ros2 run ackermann_controller pure_pursuit_controller.py
+```
+
 ### 4 Stanley controller
 
 #### 4.1 Implementation
+
+#### 4.2 Results
+
+To run this controller, you can follow this command below:
+
+```
+ros2 run ackermann_controller 
+```
 
 ### 5 Conclusion
 
