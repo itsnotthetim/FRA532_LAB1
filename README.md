@@ -362,9 +362,11 @@ Forward kinematics models is using for calculate wheel speed into robot twist(at
 
 **Key Equations** 
 
-$$ {\left\lbrack \matrix{x_k \cr y_k \cr \theta_k \cr \beta_k \cr v_k \cr \omega_k} \right\rbrack}
-= \left \lbrack \matrix{y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \cr y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \cr \theta_{k-1} + \omega_{k-1} \cdot \Delta t \cr \beta_{R,k}^{\ast} \cr \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \cr \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)} \right\rbrack
-$$
+$$ \left\lbrack \matrix{x_k \cr y_k \cr \theta_k \cr \beta_k \cr v_k \cr \omega_k} \right\rbrack$$
+
+$$\left \lbrack \matrix{y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \cr y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \cr \theta_{k-1} + \omega_{k-1} \cdot \Delta t \cr \beta_{R,k}^{\ast} \cr \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \cr \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)} \right\rbrack$$
+
+$$ \left\lbrack \matrix{x_k \cr y_k \cr \theta_k \cr \beta_k \cr v_k \cr \omega_k} \right\rbrack = \left \lbrack \matrix{y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \cr y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \cr \theta_{k-1} + \omega_{k-1} \cdot \Delta t \cr \beta_{R,k}^{\ast} \cr \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \cr \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)} \right\rbrack$$
 
 $$
 \begin{align*}
