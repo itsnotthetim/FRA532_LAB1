@@ -74,8 +74,8 @@ To use this project. You need to have all of prerequisites for this project.
 
 #### Python packages
 
-[!WARNING]
-Make sure you have python version >= 3.6 already.
+> [!WARNING]
+> Make sure you have python version >= 3.6 already.
 
 *   numpy
 
