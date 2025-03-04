@@ -7,6 +7,9 @@
 <ol>
     <li>
         <a href="#about-the-project">About The Project</a>
+        <ul>
+            <li><a href="#system-architecture">System Architecture</a></li>
+        </ul>
     </li>
     <li>
         <a href="#getting-started">Getting Started</a>
@@ -30,17 +33,20 @@
             <li><a href="#2-inverse-kinematics-models">Inverse Kinematics Models</a></li>
             <li><a href="#3-forward-kinematics-models">Forward Kinematics Models</a></li>
             <li><a href="#4-validation">Validation</a></li>
-            <li><a href="#5-model-selection-guide">Model selection guide</a></li>
+            <li><a href="#5-conclusion">Conclusion</a></li>
         </ul>
     <li><a href="#path-tracking-controller">Path tracking controller</a></li>
     <li><a href="#state-estimator">State estimator</a></li>
     <ul>
-        <li><a href="#introduction-to-kalman-filter">Introduction to Kalman Filter</a></li>
-        <li><a href="#understanding-matrix-q-and-r">Understanding Matrix Q and R</a></li>
-        <li><a href="#tuning-q-and-r">Tuning Q and R</a></li>
-        <li><a href="#implementation">Implementation</a></li>
-        <li><a href="#validation">Validation</a></li>
-        <li><a href="#applications">Applications</a></li>
+        <li><a href="#1-introduction-to-kalman-filter">Introduction to Kalman Filter</a></li>
+        <li><a href="#2-problem-formulation">Problem Formulation</a></li>
+        <li><a href="#3-ekf-algorithm-steps">EKF Algorithm Steps</a></li>
+        <li><a href="#4-understanding-matrix-q-and-r">Understanding Matrix Q and R</a></li>
+        <li><a href="#5-implementation">Implementation</a></li>
+        <li><a href="#6-results-without-tuning">Results without tuning</a></li>
+        <li><a href="#7-tuning-configurations-and-results">Tuning Configurations and Results</a></li>
+        <li><a href="#8-interpretation">Interpretation</a></li>
+        <li><a href="#9-conclusion">Conclusion</a></li>
     </ul>
     <li><a href="#contributors">Contributors</a></li>
 </ol>
@@ -49,6 +55,8 @@
 ## About The Project
 
 This project is in FRA532(Mobile Robotics) class at **FIBO** that teach about Mobile robotics. So **LAB1** is the one of class's lab that have 3 sub-labs that are kinematics of mobile robot, path tracking controller, and state estimator.
+
+### System Architecture
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -573,7 +581,7 @@ To select the controllers that given by instruction(PID, Pure Pursuit, Linear MP
 
 For accurate localization in mobile robot application, we use extended kalman filter to do sensor fusion for more accurate odometry.
 
-### Introduction to Kalman Filter
+### 1. Introduction to Kalman Filter
 
 The **Kalman Filter** is an optimal recursive Bayesian estimator that predicts the state of a dynamic system and updates its estimates based on noisy sensor measurements. It assumes that the system follows a linear Gaussian model and consists of two main steps:
 
@@ -582,11 +590,11 @@ The **Kalman Filter** is an optimal recursive Bayesian estimator that predicts t
 
 For nonlinear systems, the **Extended Kalman Filter (EKF)** linearizes the system at each time step.
 
-### Problem Formulation
+### 2. Problem Formulation
 
 Given a mobile robot operating in a 2D space, the goal is to estimate its **position**  $\mu$  and **orientation**  $\theta$  based on odometry and sensor readings.
 
-#### State Representation
+#### 2.1 State Representation
 
 The system state is represented as:
 
@@ -596,7 +604,7 @@ where:
 - $x_k$ , $y_k$ are the position coordinates.
 - $\theta_k$  is the orientation angle.
 
-#### Motion Model (Prediction Step)
+#### 2.2 Motion Model (Prediction Step)
 
 The robot's motion is modeled by a control input \($U_k$\), which includes the velocity \($v_k$\) and angular velocity \($\omega_k$\):
 
@@ -610,7 +618,7 @@ $$\begin{bmatrix} x_{k+1} \\ y_{k+1} \\ \theta_{k+1} \end{bmatrix} =
 
 - $w_k \sim \mathcal{N}(0, Q_k)$ represents process noise with covariance $Q_k$.
 
-#### Observation Model (Update Step)
+#### 2.3 Observation Model (Update Step)
 
 Sensor measurements  $Z_k$  provide noisy observations of the actual state:
 
@@ -621,7 +629,7 @@ where:
 $$Z_k = \begin{bmatrix} x_k^m \\ y_k^m \end{bmatrix} + v_k$$
 and $v_k \sim \mathcal{N}(0, R_k)$ is the measurement noise with covariance $R_k$.
 
-### EKF Algorithm Steps
+### 3. EKF Algorithm Steps
 
 1. **Prediction Step:**
 
@@ -640,9 +648,10 @@ and $v_k \sim \mathcal{N}(0, R_k)$ is the measurement noise with covariance $R_k
   
    where H_k$ is the Jacobian of the measurement function \($h(X_k)$\), and K_k$ is the **Kalman Gain**.
 
-### Understanding Matrix Q and R
+### 4 Understanding Matrix Q and R
 
-#### Process Noise Covariance Matrix (Q)
+#### 4.1 Process Noise Covariance Matrix (Q)
+
 - Represents uncertainty in the system's **motion model** due to unmodeled dynamics, control input inaccuracies, and external disturbances.
 - Mathematically influences the state covariance update in the **prediction step**:
   
@@ -668,7 +677,8 @@ where:
 -  $\sigma_\theta^2$  represents **heading uncertainty** (radians²).
 
 
-#### Measurement Noise Covariance Matrix (R)
+#### 4.2 Measurement Noise Covariance Matrix (R)
+
 - Represents uncertainty in **sensor measurements** due to sensor resolution limits, environmental interference, and sampling variations.
 - Influences the **update step**:
   
@@ -677,13 +687,9 @@ where:
 - **Large R:** The filter trusts the motion model more, reducing sensitivity to sensor noise but slowing adaptation.
 - **Small R:** The filter follows sensor readings closely but may overreact to noise.
 
-
 **Since the GPS provides measurements for x and y positions, the R matrix should be:**
 
-
 Given that the GPS noise standard deviation is 0.05 meters, the variance is:
-
-
 
 Thus, R should be:
 
@@ -695,7 +701,7 @@ self.R = np.diag([0.0025, 0.0025])  # Fixed measurement noise covariance
 
 - The EKF trusts GPS moderately but filters out small fluctuations.
 
-### Implementation
+### 5. Implementation
 
 This code is in <a href="src/ackermann_controller/scripts/ekf_node.py">ekf_node.py</a>.
 
@@ -823,7 +829,7 @@ if __name__ == '__main__':
     main()
 ```
 
-### Results without tuning.
+### 6. Results without tuning.
 
 1. Yaw-Rate EKF
 
@@ -837,11 +843,11 @@ if __name__ == '__main__':
 
 <p align="center"><img src="images/lab1.3/validation/ekf_init_db_validation_figure.png" alt="tf_viewframe" /></p>
 
-### Tuning Configurations and Results
+### 7. Tuning Configurations and Results
 
 We tested five different settings for **Q** with Ackerman steering type: <a href="#33-double-track-model">Double-track model</a> via <a href="#pure-pursuit-controller">Pure Pursuit controller</a> and recorded the errors for demonstrated how to tune the matrix Q. Here are the results:
 
-#### 1. Initial Configuration 
+#### 7.1 Initial Configuration 
 
 <p align="center"><img src="images/lab1.3/validation/ekf_init_db_validation_figure.png" alt="Initial Figure" /></p>
 
@@ -851,7 +857,7 @@ We tested five different settings for **Q** with Ackerman steering type: <a href
 
 <p align="center"><img src="images/lab1.3/information/db_init.png" alt="Initial Configuration" /></p>
 
-#### 2. First Decrease in Q 
+#### 7.2 First Decrease in Q 
 
 <p align="center"><img src="images/lab1.3/validation/ekf_dec1_db_validation_figure.png" alt="First Decrease Figure" /></p>
 
@@ -861,7 +867,7 @@ We tested five different settings for **Q** with Ackerman steering type: <a href
 
 <p align="center"><img src="images/lab1.3/information/db_dec1.png" alt="First Decrease in Q" /></p>
 
-#### 3. Second Decrease in Q 
+#### 7.3 Second Decrease in Q 
 
 <p align="center"><img src="images/lab1.3/validation/ekf_dec2_db_validation_figure.png" alt="Second Decrease Figure" /></p>
 
@@ -871,7 +877,7 @@ We tested five different settings for **Q** with Ackerman steering type: <a href
 
 <p align="center"><img src="images/lab1.3/information/db_dec2.png" alt="Second Decrease in Q" /></p>
 
-#### 4. First Adjustment (`db_adj1.png`)
+#### 7.4 First Adjustment (`db_adj1.png`)
 
 <p align="center"><img src="images/lab1.3/validation/ekf_adj1_db_validation_figure.png" alt="First Adjustment Figure" /></p>
 
@@ -881,7 +887,7 @@ We tested five different settings for **Q** with Ackerman steering type: <a href
 
 <p align="center"><img src="images/lab1.3/information/db_adj1.png" alt="First Adjustment" /></p>
 
-#### 5. Second Adjustment (`db_adj2.png`)
+#### 7.5 Second Adjustment (`db_adj2.png`)
 
 <p align="center"><img src="images/lab1.3/validation/ekf_adj2_db_validation_figure.png" alt="Second Adjustment Figure" /></p>
 
@@ -891,31 +897,31 @@ We tested five different settings for **Q** with Ackerman steering type: <a href
 
 <p align="center"><img src="images/lab1.3/information/db_adj2.png" alt="Second Adjustment" /></p>
 
-### Interpretation
+### 8. Interpretation
 
-#### Initial Configuration
+#### 8.1 Initial Configuration
 
 - **High Errors**: The initial guess had large errors because the filter trusted the motion model too much.
 
-#### First Decrease in Q
+#### 8.2 First Decrease in Q
 
 - **Better Accuracy**: Reduce **Q** to make the filter rely more on sensor data, which improved accuracy.
 
-#### Second Decrease in Q
+#### 8.3 Second Decrease in Q
 
 - **Slight Problems**: Making **Q** even smaller caused the filter to trust the sensors too much, leading to small errors in position.
 
-#### First Adjustment
+#### 8.4 First Adjustment
 
 - **Good Balance**: Adjust **Q** to `[0.001, 0.001, 0.0001]` to gave a good mix of trusting the motion model and sensor data.
 
-#### Second Adjustment
+#### 8.5 Second Adjustment
 
 - **Best Performance**: The final setting (`[0.0005, 0.0005, 0.0002]`) gave the lowest errors, making it the best choice.
 
 **For the further tuning might not give the better result (not showing the significant difference) and will output the similar result (Probably the limitation ability of model, etc.)**
 
-### Conclusion
+### 9. Conclusion
 
 - **Tuning Q**: Finding the right balance for **Q** is key to making the EKF work well.
 - **Best Setting**: The setting `np.diag([0.0005, 0.0005, 0.0002])` gave closer the optimal result.
