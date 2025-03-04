@@ -149,7 +149,7 @@ Where:
 - **\( $v_{R,L,k}$ \)** - The velocity of the rear left wheel at time step \( k \).
 - **\( $v_{R,R,k}$ \)** - The velocity of the rear right wheel at time step \( k \).
 - **\( $r_b $\)** - The distance from the center of the rear axle to the vehicle's center of rotation.
-- **\($ \beta_F^*$ \)** - The effective front slip angle of the vehicle.
+- **\( $\beta_F^* $ \)** - The effective front slip angle of the vehicle.
 
 
 ### 2.1 Yaw-Rate Model
