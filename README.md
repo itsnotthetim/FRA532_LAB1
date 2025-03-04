@@ -362,7 +362,8 @@ Forward kinematics models is using for calculate wheel speed into robot twist(at
 
 **Key Equations** 
 
-$$\begin{align*}
+$$
+\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -380,7 +381,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
 \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
 \end{bmatrix}
-\end{align*}$$
+\end{align*}
+$$
 
 #### 3.2 Single-Track Model
 
@@ -393,7 +395,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 **Key Equations**
 
-$$\begin{align*}
+$$
+\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -411,7 +414,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
 \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
 \end{bmatrix}
-\end{align*}$$
+\end{align*}
+$$
 
 #### 3.3 Double-Track Model
 
@@ -423,7 +427,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 **Key Equations**
 
-$$\begin{align*}
+$$
+\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -441,9 +446,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\
 \frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
 \end{bmatrix}
-\end{align*}$$
-
----
+\end{align*}
+$$
 
 > [!NOTE]
 > The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_fk.py#L96-L114">forward kinematics script</a>).
@@ -577,7 +581,9 @@ This controller is the basic controller to implement in many systems, including 
 * **Cross-Track Error:**
     This is the perpendicular distance from the robot’s current position to the nearest point on the desired path. The equation is given by:
 
-    $$CTE = \sqrt{(x_{closest} - x_{robot})^2 + (y_{closest} - y_{robot})^2}$$ 
+    $$
+    CTE = \sqrt{(x_{closest} - x_{robot})^2 + (y_{closest} - y_{robot})^2}
+    $$ 
 
     Where:
     * $x_{\text{robot}}$ and $y_{\text{robot}}$ are the coordinates of the robot's current position.
@@ -586,7 +592,9 @@ This controller is the basic controller to implement in many systems, including 
 * **Proportional term:**
     Applies a correction proportional to the current error. The equation is given by:
 
-    $$P = K_p \cdot e(t)$$
+    $$
+    P = K_p \cdot e(t)
+    $$
 
     Where $e(t)$ is the error at time $t$ and $K_p$ is the proportional gain.
 
@@ -601,7 +609,7 @@ This controller is the basic controller to implement in many systems, including 
     Predicts future error based on the rate of change, helping to dampen the system. The equation is given by:
 
     $$D = K_d \cdot \frac{de(t)}{dt}$$
-    
+
     Where $K_d$ is the integral gain.
 
 * **Combinded PID controller law:**
