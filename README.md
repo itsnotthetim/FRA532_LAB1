@@ -581,9 +581,7 @@ This controller is the basic controller to implement in many systems, including 
 * **Cross-Track Error:**
     This is the perpendicular distance from the robot’s current position to the nearest point on the desired path. The equation is given by:
 
-    $$
-    CTE = \sqrt{(x_{closest} - x_{robot})^2 + (y_{closest} - y_{robot})^2}
-    $$ 
+    $$CTE = \sqrt{(x_{closest} - x_{robot})^2 + (y_{closest} - y_{robot})^2}$$ 
 
     Where:
     * $x_{\text{robot}}$ and $y_{\text{robot}}$ are the coordinates of the robot's current position.
@@ -592,9 +590,7 @@ This controller is the basic controller to implement in many systems, including 
 * **Proportional term:**
     Applies a correction proportional to the current error. The equation is given by:
 
-    $$
-    P = K_p \cdot e(t)
-    $$
+    $$P = K_p \cdot e(t)$$
 
     Where $e(t)$ is the error at time $t$ and $K_p$ is the proportional gain.
 
@@ -726,7 +722,9 @@ This controller is is a geometric method used for path tracking in autonomous ve
 
 * **Steering Angle Calculation:**
     The required steering angle is determined by the curvature of the circle. The curvature $\kappa$ is given by:
+
     $$\kappa = \frac{2 \sin(\alpha)}{L_d}$$
+
     where:
     * $\alpha$ is the angle between the vehicle's heading and the line connecting it to the lookahead point.
     * $L_d$ is the lookahead distance.
@@ -788,7 +786,9 @@ This controller is a widely used algorithm for path tracking in autonomous vehic
 
 * **Steering Command Calculation:**
     The Stanley controller computes the steering angle ($\delta$) by combining the heading error with a term that accounts for the cross-track error. The typical formula is:
+
     $$\delta = \theta_e + \arctan\left(\frac{k \cdot e}{v}\right)$$
+    
     Where:
     * $\theta_e$ is the heading error.
     * $e$ is the cross-track error.
@@ -874,7 +874,9 @@ Given a mobile robot operating in a 2D space, the goal is to estimate its **posi
 #### 2.1 State Representation
 
 The system state is represented as:
+
 $$X_k = \begin{bmatrix} x_k \\ y_k \\ \theta_k \end{bmatrix}$$
+
 where:
 - $x_k$ , $y_k$ are the position coordinates.
 - $\theta_k$  is the orientation angle.
@@ -882,8 +884,11 @@ where:
 #### 2.2 Motion Model (Prediction Step)
 
 The robot's motion is modeled by a control input ($U_k$), which includes the velocity ($v_k$) and angular velocity ($\omega_k$):
+
 $$X_{k+1} = f(X_k, U_k) + w_k$$
+
 where:
+
 $$\begin{bmatrix} x_{k+1} \\ y_{k+1} \\ \theta_{k+1} \end{bmatrix} =\begin{bmatrix} x_k + v_k \Delta t \cos\theta_k \\ y_k + v_k \Delta t \sin\theta_k \\ \theta_k + \omega_k \Delta t \end{bmatrix} + w_k$$
 
 
@@ -892,22 +897,33 @@ $$\begin{bmatrix} x_{k+1} \\ y_{k+1} \\ \theta_{k+1} \end{bmatrix} =\begin{bmatr
 #### 2.3 Observation Model (Update Step)
 
 Sensor measurements $Z_k$ provide noisy observations of the actual state:
+
 $$Z_k = h(X_k) + v_k$$
+
 where:
+
 $$Z_k = \begin{bmatrix} x_k^m \\ y_k^m \end{bmatrix} + v_k$$
+
 - $v_k \sim \mathcal{N}(0, R_k)$ is the measurement noise with covariance $R_k$.
 
 ### 3. EKF Algorithm Steps
 
 1. **Prediction Step:**
+
    $$\hat{X}_{k+1} = f(X_k, U_k)$$
+
    $$P_{k+1} = F_k P_k F_k^T + Q_k$$
+
     where $F_k$ is the Jacobian of $f(X_k, U_k)$.
 
 2. **Update Step:**
+
    $$K_k = P_k H_k^T (H_k P_k H_k^T + R_k)^{-1}$$
+
    $$X_k = \hat{X}_k + K_k (Z_k - h(\hat{X}_k))$$
+
    $$P_k = (I - K_k H_k) P_k$$
+
    where $H_k$ is the Jacobian of the measurement function ($h(X_k)$), and $K_k$ is the **Kalman Gain**.
 
 ### 4 Understanding Matrix Q and R
@@ -916,17 +932,23 @@ $$Z_k = \begin{bmatrix} x_k^m \\ y_k^m \end{bmatrix} + v_k$$
 
 - Represents uncertainty in the system's **motion model** due to unmodeled dynamics, control input inaccuracies, and external disturbances.
 - Mathematically influences the state covariance update in the **prediction step**:
+
     $$P_{k+1} = F_k P_k F_k^T + Q_k$$ 
+
 - **Large Q:** The filter adapts quickly but produces noisy estimates.
 - **Small Q:** The filter is stable but slow to respond to changes.
 
 So the matix $ Q$ should be like this
-$$Q =
+
+$$
+Q =
 \begin{bmatrix}
 \sigma_x^2 & 0 & 0 \\
 0 & \sigma_y^2 & 0 \\
 0 & 0 & \sigma_\theta^2
-\end{bmatrix}$$
+\end{bmatrix}
+$$
+
 where:
 -  $\sigma_x^2 $ and  $\sigma_y^2 $ represent **position uncertainty** (meters²),
 -  $\sigma_\theta^2$  represents **heading uncertainty** (radians²).
@@ -935,7 +957,9 @@ where:
 
 - Represents uncertainty in **sensor measurements** due to sensor resolution limits, environmental interference, and sampling variations.
 - Influences the **update step**:
-  $$S_k = H_k P_k H_k^T + R_k$$ 
+
+  $$S_k = H_k P_k H_k^T + R_k$$
+
 - **Large R:** The filter trusts the motion model more, reducing sensitivity to sensor noise but slowing adaptation.
 - **Small R:** The filter follows sensor readings closely but may overreact to noise.
 
