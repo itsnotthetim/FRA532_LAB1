@@ -36,14 +36,10 @@ class AckermannIKNode(Node):
         # Subscribe to cmd_vel topic
         self.cmd_vel_subscriber = self.create_subscription(
             Twist, '/cmd_vel', self.cmd_vel_callback, 10)
-        
-       
     
     def cmd_vel_callback(self, msg: Twist):
         self.linear_velocity = msg.linear.x  # Forward velocity (m/s)
         self.angular_velocity = msg.angular.z  # Rotation velocity (rad/s)
-
-
 
         if self.linear_velocity != 0.0:
             delta = math.atan((self.WB * self.angular_velocity) / self.linear_velocity)
@@ -58,7 +54,6 @@ class AckermannIKNode(Node):
             delta_L = 0.0
             delta_R = 0.0
 
-        
         if self.model == 'bicycle':
             steering_angle_left_wheel = delta
             steering_angle_right_wheel = delta
@@ -75,8 +70,6 @@ class AckermannIKNode(Node):
         rear_wheel_msg = Float64MultiArray()
         rear_wheel_msg.data = [speed_rear_wheel, speed_rear_wheel]
         self.rear_wheel_publisher.publish(rear_wheel_msg)
-
-    
 
 def main(args=None):
     rclpy.init(args=args)

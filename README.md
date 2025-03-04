@@ -319,37 +319,42 @@ Where:
 ---
 
 > [!NOTE]
-> In case, the code for the Bicycle model and the No-Slip Condition Constraints model shares similar equations, the implementation will be mostly the same, with some differences specific to each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_ik.py">inverse kinematics script</a>).
+> In case, the code for the Bicycle model and the No-Slip Condition Constraints model shares similar equations, the implementation will be mostly the same, with some differences specific to each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_ik.py#L40-L72">inverse kinematics script</a>).
 
 ```python 
     def cmd_vel_callback(self, msg: Twist):
-            self.linear_velocity = msg.linear.x  # Forward velocity (m/s)
-            self.angular_velocity = msg.angular.z  # Rotation velocity (rad/s)
+        self.linear_velocity = msg.linear.x  # Forward velocity (m/s)
+        self.angular_velocity = msg.angular.z  # Rotation velocity (rad/s)
 
-            if self.linear_velocity != 0.0:
-                # Bicycle Model
-                delta = math.atan((self.WB * self.angular_velocity) / self.linear_velocity)
+        if self.linear_velocity != 0.0:
+            delta = math.atan((self.WB * self.angular_velocity) / self.linear_velocity)
 
-                # Ackerman Steering Type: No-Slip
-                delta_Ack = delta / self.gamma
-                delta_L = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB - 0.5 * self.TW * math.tan(delta_Ack)))
-                delta_R = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB + 0.5 * self.TW * math.tan(delta_Ack)))
-            
-            else:
-                delta = 0.0
-                delta_Ack = 0.0
-                delta_L = 0.0
-                delta_R = 0.0
+            delta_Ack = delta / self.gamma
+            delta_L = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB - 0.5 * self.TW * math.tan(delta_Ack)))
+            delta_R = math.atan((self.WB * math.tan(delta_Ack)) / (self.WB + 0.5 * self.TW * math.tan(delta_Ack)))
+        
+        else:
+            delta = 0.0
+            delta_Ack = 0.0
+            delta_L = 0.0
+            delta_R = 0.0
 
-            
-            if self.model == 'bicycle':
-                steering_angle_left_wheel = delta
-                steering_angle_right_wheel = delta
-            elif self.model == 'ackermann':
-                steering_angle_left_wheel = delta_L
-                steering_angle_right_wheel = delta_R
+        if self.model == 'bicycle':
+            steering_angle_left_wheel = delta
+            steering_angle_right_wheel = delta
+        elif self.model == 'ackermann':
+            steering_angle_left_wheel = delta_L
+            steering_angle_right_wheel = delta_R
 
-            speed_rear_wheel = self.linear_velocity / self.wheel_radius
+        speed_rear_wheel = self.linear_velocity / self.wheel_radius
+
+        front_wheel_msg = Float64MultiArray()
+        front_wheel_msg.data = [steering_angle_left_wheel, steering_angle_right_wheel]
+        self.front_wheel_publisher.publish(front_wheel_msg)
+
+        rear_wheel_msg = Float64MultiArray()
+        rear_wheel_msg.data = [speed_rear_wheel, speed_rear_wheel]
+        self.rear_wheel_publisher.publish(rear_wheel_msg)
 ```
 
 ### 3 Forward Kinematics Models
@@ -378,15 +383,31 @@ v_k \\
 \end{bmatrix}
 &=
 \begin{bmatrix}
-y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
-\beta_{R,k}^{\ast} \\
-\frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
-\quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
+y_{k-1}
+  + v_{k-1} \,\Delta t \,\cos\!\Bigl(
+    \beta_{k-1}
+    + \theta_{k-1}
+    + \frac{\omega_{k-1}\,\Delta t}{2}
+  \Bigr) \\[6pt]
+y_{k-1}
+  + v_{k-1} \,\Delta t \,\sin\!\Bigl(
+    \beta_{k-1}
+    + \theta_{k-1}
+    + \frac{\omega_{k-1}\,\Delta t}{2}
+  \Bigr) \\[6pt]
+\theta_{k-1} + \omega_{k-1}\,\Delta t \\[6pt]
+\beta_{R,k}^{\ast} \\[6pt]
+\dfrac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\[6pt]
+\dfrac{v_{k-1}}{r_b} \,\Bigl(
+  \cos(\beta_{R,k}^{\ast}) \,\bigl(
+    \tan(\beta_{F,k}^{\ast}) 
+    - \tan(\beta_{R,k}^{\ast})
+  \bigr)
+\Bigr)
 \end{bmatrix}
 \end{align*}
 $$
+
 
 #### 3.2 Single-Track Model
 
@@ -399,7 +420,8 @@ $$
 
 **Key Equations**
 
-$$\begin{align*}
+$$
+\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -410,14 +432,24 @@ v_k \\
 \end{bmatrix}
 &=
 \begin{bmatrix}
-y_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
-\beta_{R,k}^{\ast} \\
-\frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
-\quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
+x_{k-1}
+  + v_{k-1}\,\Delta t\,\cos\!\Bigl(\beta_{k-1}
+    + \theta_{k-1}
+    + \frac{\omega_{k-1}\,\Delta t}{2}\Bigr) \\[6pt]
+y_{k-1}
+  + v_{k-1}\,\Delta t\,\sin\!\Bigl(\beta_{k-1}
+    + \theta_{k-1}
+    + \frac{\omega_{k-1}\,\Delta t}{2}\Bigr) \\[6pt]
+\theta_{k-1} + \omega_{k-1}\,\Delta t \\[6pt]
+\beta_{R,k}^{\ast} \\[6pt]
+\dfrac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\[6pt]
+\dfrac{v_{k-1}}{r_b}\,\Bigl(
+  \cos(\beta_{R,k}^{\ast}) \,\bigl(\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast})\bigr)
+\Bigr)
 \end{bmatrix}
-\end{align*}$$
+\end{align*}
+$$
+
 
 #### 3.3 Double-Track Model
 
@@ -429,7 +461,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 **Key Equations**
 
-$$\begin{align*}
+$$
+\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -440,14 +473,22 @@ v_k \\
 \end{bmatrix}
 &=
 \begin{bmatrix}
-x_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
-\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
-0 \\
-\frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\
-\frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
+x_{k-1} 
+  + v_{k-1} \,\Delta t \,\cos\!\Bigl(\beta_{k-1} 
+    + \theta_{k-1} 
+    + \frac{\omega_{k-1}\,\Delta t}{2}\Bigr) \\[6pt]
+y_{k-1} 
+  + v_{k-1} \,\Delta t \,\sin\!\Bigl(\beta_{k-1} 
+    + \theta_{k-1} 
+    + \frac{\omega_{k-1}\,\Delta t}{2}\Bigr) \\[6pt]
+\theta_{k-1} + \omega_{k-1} \,\Delta t \\[6pt]
+0 \\[6pt]
+\dfrac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\[6pt]
+\dfrac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
 \end{bmatrix}
-\end{align*}$$
+\end{align*}
+$$
+
 
 ---
 
