@@ -405,7 +405,8 @@ $$
 
 **Key Equations**
 
-$$\begin{align*}
+$$
+\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -423,7 +424,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \frac{v_{R,L,k}^{\ast} + v_{R,R,k}^{\ast}}{2} \\
 \quad \frac{v_{k-1}}{r_b} \left(\cos(\beta_{R,k}^{\ast}) \cdot (\tan(\beta_{F,k}^{\ast}) - \tan(\beta_{R,k}^{\ast}))\right)
 \end{bmatrix}
-\end{align*}$$
+\end{align*}
+$$
 
 #### 3.3 Double-Track Model
 
@@ -435,7 +437,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 **Key Equations**
 
-$$\begin{align*}
+$$
+\begin{align*}
 \begin{bmatrix}
 x_k \\
 y_k \\
@@ -453,7 +456,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\
 \frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
 \end{bmatrix}
-\end{align*}$$
+\end{align*}
+$$
 
 ---
 
