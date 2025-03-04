@@ -68,7 +68,7 @@ class PIDControllerNode(Node):
         
         # Declare parameters
         self.declare_parameter('rate', 100)
-        self.declare_parameter('ang_Kp', 1.0)
+        self.declare_parameter('ang_Kp', 1.25)
         self.declare_parameter('ang_Ki', 0.0)
         self.declare_parameter('ang_Kd', 0.0)
 
@@ -150,8 +150,8 @@ class PIDControllerNode(Node):
         # Calculate error
         # self.cte, self.cte_index, self.reached_goal = self.get_cte(x, y, all_x, all_y, self.cte_index)
         self.cte, self.cte_index, self.reached_goal = self.get_cte(x, y, all_x, all_y, self.cte_index)
-        sign = -1 if np.sin(yaw) * (all_x[self.cte_index] - x) - np.cos(yaw) * (all_y[self.cte_index] - y) > 0 else 1  # Determine side of path
-        error_long =  self.cte*sign# Using cross track error
+        sign = -1 if np.sin(yaw) * (all_x[self.cte_index] - x) - np.cos(yaw) * (all_y[self.cte_index] - y) > 0 else 1 # Determine side of path
+        error_long =  self.cte*sign # Using cross track error
         error_ang = all_yaw[self.cte_index] - yaw
 
         # Calculate output

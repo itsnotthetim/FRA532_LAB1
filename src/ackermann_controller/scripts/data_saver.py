@@ -13,9 +13,9 @@ class DataSaverNode(Node):
 
         # Subscriptions for odometry topics
         self.create_subscription(Odometry, '/ground_truth/odom', self.ground_truth_callback, 10)
-        self.create_subscription(Odometry, '/single_track/odom', self.single_track_callback, 10)
-        self.create_subscription(Odometry, '/double_track/odom', self.double_track_callback, 10)
-        self.create_subscription(Odometry, '/yaw_rate/odom', self.yaw_rate_callback, 10)
+        # self.create_subscription(Odometry, '/single_track/odom', self.single_track_callback, 10)
+        # self.create_subscription(Odometry, '/double_track/odom', self.double_track_callback, 10)
+        # self.create_subscription(Odometry, '/yaw_rate/odom', self.yaw_rate_callback, 10)
         
         # Subscription for reached_goal flag
         self.create_subscription(Bool, '/reached_goal', self.reached_goal_callback, 10)
@@ -96,27 +96,12 @@ class DataSaverNode(Node):
                 "time": self.gt_time,
                 "pos": self.gt_pos,
                 "yaw": self.gt_yaw
-            },
-            "single_track": {
-                "time": self.st_time,
-                "pos": self.st_pos,
-                "yaw": self.st_yaw
-            },
-            "double_track": {
-                "time": self.dt_time,
-                "pos": self.dt_pos,
-                "yaw": self.dt_yaw
-            },
-            "yaw_rate": {
-                "time": self.yr_time,
-                "pos": self.yr_pos,
-                "yaw": self.yr_yaw
             }
         }
         # Save the dictionary to a YAML file
-        with open("/home/sunny/FRA532_LAB1/src/ackermann_controller/yaml/bicycle-kinematics0.25.yaml", "w") as f:
+        with open("/home/sunny/FRA532_LAB1/src/ackermann_controller/yaml/lab1.2/stan-0.25.yaml", "w") as f:
             yaml.dump(data, f)
-        self.get_logger().info("Data saved to kinematics.yaml")
+        self.get_logger().info("Data saved to pid-0.5.yaml")
 
 def main(args=None):
     rclpy.init(args=args)

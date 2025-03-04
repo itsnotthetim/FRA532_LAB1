@@ -17,7 +17,7 @@ class StanleyController(Node):
         
         # ROS2 Publishers & Subscribers
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.subscription = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.subscription = self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
         self.timer = self.create_timer(0.01, self.stanley_control)  # Run control loop at 100 Hz
         self.reached_goal_pub = self.create_publisher(Bool, "/reached_goal", 10)
 
@@ -31,8 +31,8 @@ class StanleyController(Node):
 
         # Vehicle Parameters
         self.wheelbase = 0.2  # Distance between front and rear wheels (meters)
-        self.k = 1.0  # Gain for Stanley controller
-        self.velocity = 0.5  # Constant forward velocity
+        self.k = 2.0  # Gain for Stanley controller
+        self.velocity = 0.25  # Constant forward velocity
 
         # Control Variables
         self.position = (0.0, 0.0)
@@ -44,7 +44,7 @@ class StanleyController(Node):
         with open(file_path, "r") as file:
             path_data = yaml.safe_load(file)
         
-        waypoints = [(wp["x"], wp["y"]) for wp in path_data]  # Extract (x, y) coordinates
+        waypoints = [(wp["x"], wp["y"]) for wp in path_data] # Extract (x, y) coordinates
         self.get_logger().info(f"Loaded {len(waypoints)} waypoints from {file_path}")
         return waypoints
 
@@ -104,7 +104,8 @@ class StanleyController(Node):
         steering_angle = max(min(steering_angle, math.pi / 4), -math.pi / 4)  # Limit steering angle
 
         # Convert Steering Angle to Angular Velocity (for `/cmd_vel`)
-        angular_velocity = (2 * self.velocity * math.sin(steering_angle)) / self.wheelbase
+        # angular_velocity = (2 * self.velocity * math.sin(steering_angle)) / self.wheelbase
+        angular_velocity = steering_angle
 
         # Check if the robot has reached the final waypoint
         if len(self.waypoints) > 0 and waypoint == self.waypoints[-1]:

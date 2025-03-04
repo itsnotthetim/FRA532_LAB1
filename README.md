@@ -729,11 +729,15 @@ ros2 run ackermann_controller pid_controller.py
 
 * Slow velocity (0.25 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/" alt="PID controller Result slow velocity" /></p>
+<p align="center"><img src="images/lab1.2/validation/pid-0.25.png" alt="PID controller Result slow velocity" /></p>
+
+<p align="center"><img src="images/lab1.2/validation/pid-0.25-e.png" alt="PID controller Result slow velocity" /></p>
 
 * Fast velocity (0.5 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/" alt="PID controller Result fast velocity" /></p>
+<p align="center"><img src="images/lab1.2/validation/pid-0.5.png" alt="PID controller Result fast velocity" /></p>
+
+<p align="center"><img src="images/lab1.2/validation/pid-0.5-e.png" alt="PID controller Result fast velocity" /></p>
 
 > [!TIP]
 > Controller gains effected to the smoothness of path tracking, you can fine tune it to make this controller more smoother.
@@ -796,11 +800,15 @@ ros2 run ackermann_controller pure_pursuit_controller.py
 
 * Slow velocity (0.25 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/" alt="Pure Pursuit controller Result slow velocity" /></p>
+<p align="center"><img src="images/lab1.2/validation/pure-0.25.png" alt="Pure Pursuit controller Result slow velocity" /></p>
+
+<p align="center"><img src="images/lab1.2/validation/pure-0.25-e.png" alt="Pure Pursuit controller Result slow velocity" /></p>
 
 * Fast velocity (0.5 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/" alt="Pure Pursuit controller Result fast velocity" /></p>
+<p align="center"><img src="images/lab1.2/validation/pure-0.5.png" alt="Pure Pursuit controller Result fast velocity" /></p>
+
+<p align="center"><img src="images/lab1.2/validation/pure-0.5-e.png" alt="Pure Pursuit controller Result fast velocity" /></p>
 
 > [!TIP]
 > Lookahead distance will effected to the smoothness of path tracking, you can adjusted this distance to change your robot path tracking characteristics.
@@ -877,11 +885,15 @@ ros2 run ackermann_controller
 
 * Slow velocity (0.25 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/" alt="Stanley controller Result slow velocity" /></p>
+<p align="center"><img src="images/lab1.2/validation/stan-0.25.png" alt="Stanley controller Result slow velocity" /></p>
+
+<p align="center"><img src="images/lab1.2/validation/stan-0.25-e.png" alt="Stanley controller Result slow velocity" /></p>
 
 * Fast velocity (0.5 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/" alt="Stanley controller Result fast velocity" /></p>
+<p align="center"><img src="images/lab1.2/validation/stan-0.5.png" alt="Stanley controller Result fast velocity" /></p>
+
+<p align="center"><img src="images/lab1.2/validation/stan-0.5-e.png" alt="Stanley controller Result fast velocity" /></p>
 
 > [!TIP]
 > The choice of $k$ is crucial for balancing responsiveness and stability. An improper value may lead to oscillations or poor tracking performance.
