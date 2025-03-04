@@ -103,7 +103,8 @@ To use this project. You need to have all of prerequisites for this project.
 
 #### ROS2 packages
 
-⚠️ **Warning:** Make sure you have ROS2 humble and gazebo classic already.
+> [!WARNING]
+> Make sure you have ROS2 humble and gazebo classic already.
 
 * robot state publisher
 
@@ -158,7 +159,8 @@ Follow the command below to dowload and install package.
 <!-- USAGE -->
 ## Usage
 
-⚠️  **Warning:** Before use this project you need to `source ~/FRA532_LAB1/install/setup.bash` and `source /opt/ros/humble/setup.bash` everytime that you open new terminal. If you want to make sure that 2 path has been source everytime when open new terminal you can follow the command below and next time you open new terminal .bashrc will source everything you write on that file.
+> [!IMPORTANT]
+> Before use this project you need to `source ~/FRA532_LAB1/install/setup.bash` and `source /opt/ros/humble/setup.bash` everytime that you open new terminal. If you want to make sure that 2 path has been source everytime when open new terminal you can follow the command below and next time you open new terminal .bashrc will source everything you write on that file.
 
 ```
 echo "source ~/FRA532_LAB1/install/setup.bash" >> ~/.bashrc
@@ -316,7 +318,8 @@ Where:
 
 ---
 
-⚠️ *In case, the code for the Bicycle model and the No-Slip Condition Constraints model shares similar equations, the implementation will be mostly the same, with some differences specific to each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_ik.py">inverse kinematics script</a>).*
+> [!NOTE]
+> In case, the code for the Bicycle model and the No-Slip Condition Constraints model shares similar equations, the implementation will be mostly the same, with some differences specific to each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_ik.py">inverse kinematics script</a>).
 
 ```python 
     def cmd_vel_callback(self, msg: Twist):
@@ -448,7 +451,8 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 ---
 
-⚠️ *The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_fk.py">forward kinematics script</a>):*
+> [!NOTE]
+> The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_fk.py">forward kinematics script</a>).
 
 ```python
     def state_space(self):
@@ -483,7 +487,8 @@ To compare and validate the result, we have to analyze as follows:
 
 For see which model is stronger in which aspect or what is the strong point of those models. Additionally, the results will based on <a href="#2-inverse-kinematics-models">inverse kinematics model</a>.
 
-⚠️ **In the validation process, we use <a href="#pure-pursuit-controller">pure pursuit controller </a> to be our controller to move the robot around the map via tracking the path.**
+> [!NOTE]
+> In the validation process, we use <a href="#pure-pursuit-controller">pure pursuit controller </a> to be our controller to move the robot around the map via tracking the path.
 
 The results for each model are shown in the following graphs below:
 
