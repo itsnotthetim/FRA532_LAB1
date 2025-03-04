@@ -449,6 +449,9 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 \end{align*}
 $$
 
+
+
+
 > [!NOTE]
 > The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_fk.py#L96-L114">forward kinematics script</a>).
 
@@ -938,7 +941,7 @@ $$Z_k = \begin{bmatrix} x_k^m \\ y_k^m \end{bmatrix} + v_k$$
 - **Large Q:** The filter adapts quickly but produces noisy estimates.
 - **Small Q:** The filter is stable but slow to respond to changes.
 
-So the matix $ Q$ should be like this
+So the matix $Q$ should be like this
 
 $$
 Q =
