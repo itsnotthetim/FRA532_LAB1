@@ -301,10 +301,10 @@ $$\delta_R = \tan^{-1}\left( \frac{WB \cdot \tan(\delta_{Ack})}{WB - 0.5 \cdot T
 Where:
 - $\delta_L$ and $\delta_R$ are the left and right wheel angles, respectively.
 - $\delta_{Ack}$ is the Ackermann angle.
-- $\delta_{in} $ is the input steering angle.
+- $\delta_{in}$ is the input steering angle.
 - $\gamma$ is a scaling factor.
 - $TW$ is the track width (distance between the left and right wheels).
-- $WB$ $is the wheelbase (distance between the front and rear axles).
+- $WB$ is the wheelbase (distance between the front and rear axles).
 - $P_{Ack}$ is the Ackermann percentage.
 
 ---
