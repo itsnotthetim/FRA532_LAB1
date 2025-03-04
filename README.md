@@ -1,3 +1,8 @@
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+
 # FRA532 LAB1
 
 <p align="center"><img src="images/introduction/gazebo_purepursuit.gif" alt="Overview .gif" /></p>
@@ -466,6 +471,8 @@ For all equations, this is variable definitions.
 - $v_{R,R,k}$ - The velocity of the rear right wheel at time step $k$.
 - $r_b$ - The distance from the center of the rear axle to the vehicle's center of rotation.
 - $\beta_F^*$ - The effective front slip angle of the vehicle.
+
+---
 
 > [!NOTE]
 > The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_fk.py#L96-L114">forward kinematics script</a>).
