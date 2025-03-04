@@ -726,6 +726,9 @@ ros2 run ackermann_controller pid_controller.py
 
 <p align="center"><img src="images/lab1.2/validation/" alt="PID controller Result fast velocity" /></p>
 
+> [!TIP]
+> Controller gains effected to the smoothness of path tracking, you can fine tune it to make this controller more smoother.
+
 ### 3 Pure Pursuit controller
 
 This controller is is a geometric method used for path tracking in autonomous vehicles and mobile robots. Its main goal is to generate steering commands that guide the vehicle along a predefined path.
@@ -789,6 +792,9 @@ ros2 run ackermann_controller pure_pursuit_controller.py
 * Fast velocity (0.5 m/s)
 
 <p align="center"><img src="images/lab1.2/validation/" alt="Pure Pursuit controller Result fast velocity" /></p>
+
+> [!TIP]
+> Lookahead distance will effected to the smoothness of path tracking, you can adjusted this distance to change your robot path tracking characteristics.
 
 ### 4 Stanley controller
 
@@ -867,6 +873,9 @@ ros2 run ackermann_controller
 * Fast velocity (0.5 m/s)
 
 <p align="center"><img src="images/lab1.2/validation/" alt="Stanley controller Result fast velocity" /></p>
+
+> [!TIP]
+> The choice of $k$ is crucial for balancing responsiveness and stability. An improper value may lead to oscillations or poor tracking performance.
 
 ### 5 Conclusion
 
