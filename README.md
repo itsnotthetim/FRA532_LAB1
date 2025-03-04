@@ -450,22 +450,29 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 $$
 
 For all forward kinematics equations, this is variable definitions.
-- $x_k$ - The x-coordinate of the vehicle at time step  $k$ .
-- $y_k$ - The y-coordinate of the vehicle at time step  $k$ .
-- $\theta_k$ - The orientation (yaw angle) of the vehicle at time step $k$.
-- $\beta_k$ - The sideslip angle (angle between the velocity vector and the longitudinal axis of the vehicle) at time step $k$.
-- $v_k$ - The linear velocity of the vehicle at time step $k$.
--  $\omega_k$ - The angular velocity (yaw rate) of the vehicle at time step $k$.
-- $\Delta t$ - The discrete time step between $k$ and $k$.
-- $\beta_{k-1}$ - The sideslip angle at the previous time step $k-1$.
-- $\theta_{k-1}$ - The orientation at the previous time step $k-1$.
-- $v_{k-1}$ - The linear velocity at the previous time step $k-1$.
-- $\omega_{k-1}$ - The angular velocity at the previous time step $k-1$.
-- $\beta_R^*$ - The effective rear slip angle of the vehicle.
-- $v_{R,L,k}$ - The velocity of the rear left wheel at time step $k$.
-- $v_{R,R,k}$ - The velocity of the rear right wheel at time step $k$.
-- $r_b$ - The distance from the center of the rear axle to the vehicle's center of rotation.
-- $\beta_F^*$ - The effective front slip angle of the vehicle.
+- $x_{k-1}$ and $y_{k-1}$ is the vehicle’s global position (in the $x$–$y$ plane) at the previous time step $k-1$.
+
+- $\theta_{k-1}$ is the vehicle’s heading angle at $k-1$, measured relative to the global $x$-axis.
+
+- $\beta_{k-1}$ is the slip angle or effective steering angle at $k-1$, representing how the vehicle is oriented relative to its direction of travel.
+
+- $v_{k-1}$ is the vehicle’s forward (longitudinal) velocity at $k-1$.
+
+- $\omega_{k-1}$ is the yaw rate at $k-1$, indicating how quickly the vehicle is rotating around its vertical axis.
+
+- $\Delta t$: is the time step between the $k-1$-th and $k$-th states.
+
+- $\beta_{F,k}^{\ast}$ is the front steering angle command (or front slip angle) at time $k$.
+
+- $\beta_{R,k}^{\ast}$ is the rear steering angle command (or rear slip angle) at time $k$.
+
+- $v_{RL,k}$, $v_{RR,k}$ is the individual wheel velocities for the rear-left and rear-right wheels at time $k$.
+
+- $r_b$ is a characteristic distance in the model (e.g., from the rear axle to the front axle or the center of rotation).
+
+- $TW$ is the track width, which is the distance between the left and right wheels.
+
+- $M_k$ is a reference or target point in the plane at time $k$, often used for path-following or control algorithms.
 
 ---
 
