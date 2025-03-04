@@ -160,8 +160,6 @@ After launch the project, rviz2 and gazebo window will show up on your screen wi
 
 <p align="center"><img src="images/introduction/launch_sim.png" alt="After launch project" /></p>
 
-**You can selected/changed the kinematics model and other parameters/arguments via <a href="src/ack_description/launch/sim.launch.py">this</a> launch file.**
-
 ### Run the controller node
 
 To use controller for path tracking in lab 1.2 and 1.3, you can use this command below to start the controller node.
@@ -420,7 +418,21 @@ y_k \\
 \beta_k \\
 v_k \\
 \omega_k
-\end{bmatrix}h tracking controller or local planner is the algorithm to tracking the path that given from somewhere like global planner. The goal of this algorithm is based on what mission robot need to do, in
+\end{bmatrix}
+&=
+\begin{bmatrix}
+x_{k-1} + v_{k-1} \cdot \Delta t \cdot \cos\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \frac{\omega_{k-1} \cdot \Delta t}{2}\right) \\
+\theta_{k-1} + \omega_{k-1} \cdot \Delta t \\
+0 \\
+\frac{\tilde{v}_{RL,k} + \tilde{v}_{RR,k}}{2} \\
+\frac{\tilde{v}_{RR,k} - \tilde{v}_{RL,k}}{TW}
+\end{bmatrix}
+\end{align*}$$
+
+---
+
+⚠️ *The code for all three models has a similar structure but differs in some equations, like those involving $\omega_k$, the implementation will mostly be the same, with some variations for each model. The code will look like this(<a href="src/ackermann_controller/scripts/ackermann_fk.py">forward kinematics script</a>):*
 
 ```python
     def state_space(self):
