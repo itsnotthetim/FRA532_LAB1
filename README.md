@@ -36,6 +36,13 @@
             <li><a href="#5-conclusion">Conclusion</a></li>
         </ul>
     <li><a href="#path-tracking-controller">Path tracking controller</a></li>
+        <ul>
+            <li><a href="#1-controller-selection">Controller selection</a></li>
+            <li><a href="#2-pid-controller">PID controller</a></li>
+            <li><a href="#3-pure-pursuit-controller">Pure Pursuit controller</a></li>
+            <li><a href="#4-stanley-controller">Stanley controller</a></li>
+            <li><a href="#5-conclusion-1">Conclusion</a></li>
+        </ul>
     <li><a href="#state-estimator">State estimator</a></li>
     <ul>
         <li><a href="#1-introduction-to-kalman-filter">Introduction to Kalman Filter</a></li>
@@ -190,7 +197,7 @@ This step will explain more in <a href="#path-tracking-controller">Lab 1.2</a> s
 
 This section provided robot model with inverse and forward kinematics for simulate, control, and calculate odometry of robot.
 
-### 1. Robot model
+### 1 Robot model
 
 #### 1.1 Robot description
 
@@ -238,7 +245,7 @@ If we use `view frame` of `tf2_tools`, the result is a image below.
 
 <p align="center"><img src="images/lab1.1/information/tf_viewframe.png" alt="tf_viewframe" /></p>
 
-### 2. Inverse Kinematics Models
+### 2 Inverse Kinematics Models
 
 Inverse kinematics models is using for calculate twist at robot frame into wheel speed.
 
@@ -341,7 +348,7 @@ Where:
             speed_rear_wheel = self.linear_velocity / self.wheel_radius
 ```
 
-### 3. Forward Kinematics Models
+### 3 Forward Kinematics Models
 
 Forward kinematics models is using for calculate wheel speed into robot twist(at robot frame).
 
@@ -466,14 +473,12 @@ y_{k-1} + v_{k-1} \cdot \Delta t \cdot \sin\left(\beta_{k-1} + \theta_{k-1} + \f
 
 ---
 
-### 4. Validation
+### 4 Validation
 
 To compare and validate the result, we have to analyze as follows:
 
 1. Position.
 2. Orientation.
-3. Linear velocity.
-4. Angular velocity.
 
 For see which model is stronger in which aspect or what is the strong point of those models. Additionally, the results will based on <a href="#2-inverse-kinematics-models">inverse kinematics model</a>.
 
@@ -533,7 +538,7 @@ The results for each model are shown in the following graphs below:
 
         ---
 
-### 5. Conclusion
+### 5 Conclusion
 
 
 
@@ -554,26 +559,30 @@ The results for each model are shown in the following graphs below:
 
 Path tracking controller or local planner is the algorithm to tracking the path that given from somewhere like global planner. The goal of this algorithm is based on what mission robot need to do, in this case is only to track the path.
 
-### Controller selection
+### 1 Controller selection
 
 To select the controllers that given by instruction(PID, Pure Pursuit, Linear MPC, and Stanley). We based on the mission of robot that is tracking the path. And all of controllers in instruction can track the path. So we selected them by using this rules below.
 
-1. EiEi
-2. EuEu
-3. EaEA
+1. What kind of environments do robots face?
+2. The need for smoothness of the robot in following the path.
+3. How difficult is it to implement?
 
-### PID controller
+### 2 PID controller
 
+This controller is the basic controller to implement in many systems, including this task path tracking controller. PID has main three terms to control system such as proportional, integral, and derivative. you can study more about this controller via this <a href="https://www.mathworks.com/discovery/pid-control.html">link</a>.
 
-
-### Pure Pursuit controller
-
-
-
-### Stanley controller
+#### 2.1 Implementation
 
 
+### 3 Pure Pursuit controller
 
+#### 3.1 Implementation
+
+### 4 Stanley controller
+
+#### 4.1 Implementation
+
+### 5 Conclusion
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
