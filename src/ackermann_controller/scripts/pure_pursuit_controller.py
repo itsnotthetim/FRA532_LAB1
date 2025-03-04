@@ -18,7 +18,7 @@ class PurePursuit(Node):
         
         # ROS2 Publishers & Subscribers
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.subscription = self.create_subscription(Odometry, '/double_track/odom', self.odom_callback, 10)
+        self.subscription = self.create_subscription(Odometry, '/yaw_rate/odom', self.odom_callback, 10)
         self.timer = self.create_timer(0.01, self.pure_pursuit_control)  # Run control loop at 100 Hz
         self.reached_goal_pub = self.create_publisher(Bool, "/reached_goal", 10)
 

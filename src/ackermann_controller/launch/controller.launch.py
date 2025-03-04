@@ -43,7 +43,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"kinematic_model": "double_track"},
-            {"pub_tf": True},           
+            {"pub_tf": False},           
         ],
     )
 
@@ -54,7 +54,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"kinematic_model": "yaw_rate"},
-            {"pub_tf": False},
+            {"pub_tf": True},
         ],
     )
 

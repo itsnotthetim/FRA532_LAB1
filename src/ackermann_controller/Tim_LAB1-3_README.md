@@ -241,13 +241,22 @@ if __name__ == '__main__':
     main()
 
 ```
+#### Single-Track EKF
+![Single Figure](figures/ekf_s_figure.png)
+
+#### Double-Track EKF
+![Double Figure](figures/ekf_init_db_validation_figure.png)
+
+#### Yaw-Rate EKF
+![Yaw Rate Figure](figures/ekf_yaw_figure.png)
+---
 ## Tuning Configurations and Results
 
-We tested five different settings for **Q** with Ackerman steering type: Double-track model and recorded the errors for demonstrated how to tune the matrix Q. Here are the results:
+We tested five different settings for **Q** with Ackerman steering type: Double-track model via Pure Pursuit Algorithm and recorded the errors for demonstrated how to tune the matrix Q. Here are the results:
 
 ### 1. Initial Configuration 
 
-![Initial Configuration](figures/ekf_init_db_validation_figure.png)
+![Initial Figure](figures/ekf_init_db_validation_figure.png)
 - **Q**: `np.diag([0.01, 0.01, 0.01])`
 - **Mean Position Error**: `0.1665 m`
 - **Mean Yaw Error**: `0.1631 rad`
@@ -258,7 +267,7 @@ We tested five different settings for **Q** with Ackerman steering type: Double-
 
 ### 2. First Decrease in Q 
 
-![Initial Configuration](figures/ekf_dec1_db_validation_figure.png)
+![First Decrease Figure](figures/ekf_dec1_db_validation_figure.png)
 - **Q**: `np.diag([0.001, 0.001, 0.001])`
 - **Mean Position Error**: `0.0768 m`
 - **Mean Yaw Error**: `0.0819 rad`
@@ -269,7 +278,7 @@ We tested five different settings for **Q** with Ackerman steering type: Double-
 
 ### 3. Second Decrease in Q 
 
-![Initial Configuration](figures/ekf_dec2_db_validation_figure.png)
+![Second Decrease Figure](figures/ekf_dec2_db_validation_figure.png)
 - **Q**: `np.diag([0.0001, 0.0001, 0.0001])`
 - **Mean Position Error**: `0.0909 m`
 - **Mean Yaw Error**: `0.0671 rad`
@@ -280,7 +289,7 @@ We tested five different settings for **Q** with Ackerman steering type: Double-
 
 ### 4. First Adjustment (`db_adj1.png`)
 
-![Initial Configuration](figures/ekf_adj1_db_validation_figure.png)
+![First Adjustment Figure](figures/ekf_adj1_db_validation_figure.png)
 - **Q**: `np.diag([0.001, 0.001, 0.0001])`
 - **Mean Position Error**: `0.0668 m`
 - **Mean Yaw Error**: `0.0644 rad`
@@ -291,7 +300,7 @@ We tested five different settings for **Q** with Ackerman steering type: Double-
 
 ### 5. Second Adjustment (`db_adj2.png`)
 
-![Initial Configuration](figures/ekf_adj2_db_validation_figure.png)
+![Second Adjustment Figure](figures/ekf_adj2_db_validation_figure.png)
 - **Q**: `np.diag([0.0005, 0.0005, 0.0002])`
 - **Mean Position Error**: `0.0625 m`
 - **Mean Yaw Error**: `0.0513 rad`

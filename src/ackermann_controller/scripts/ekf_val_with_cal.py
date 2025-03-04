@@ -20,7 +20,7 @@ class KinematicValidateNode(Node):
         self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
         self.create_subscription(Odometry, '/ekf_odom', self.ekf_callback, 10)
         self.create_subscription(Odometry, '/ground_truth/odom', self.odom_callback, 10)
-        self.create_subscription(Odometry, '/double_track/odom', self.single_track_callback, 10)
+        self.create_subscription(Odometry, '/yaw_rate/odom', self.single_track_callback, 10)
         self.create_subscription(Bool, '/is_finished', self.is_finished_callback, 10)
 
         # Load Waypoints from YAML File
@@ -54,15 +54,15 @@ class KinematicValidateNode(Node):
         self.gps_line, = self.ax_traj.plot([], [], 'ro', label='GPS', markersize=0.7)
         self.ekf_line, = self.ax_traj.plot([], [], 'b-', label='EKF Estimate')
         self.odom_line, = self.ax_traj.plot([], [], 'g--', label='Wheel Odometry')
-        self.single_track_line, = self.ax_traj.plot([], [], 'c-.', label='Double track Model')
-        self.ax_traj.set_title("EKF: Double track Model Validation")
+        self.single_track_line, = self.ax_traj.plot([], [], 'c-.', label='Yaw rate Model')
+        self.ax_traj.set_title("EKF: Yaw Rate Model Validation")
         self.ax_traj.set_xlabel("X Position (m)")
         self.ax_traj.set_ylabel("Y Position (m)")
         self.ax_traj.legend()
 
         self.ekf_yaw_line, = self.ax_yaw.plot([], [], 'b-', label='EKF Yaw')
         self.odom_yaw_line, = self.ax_yaw.plot([], [], 'g--', label='Wheel Odometry Yaw')
-        self.single_track_yaw_line, = self.ax_yaw.plot([], [], 'c-.', label='Double track Yaw')
+        self.single_track_yaw_line, = self.ax_yaw.plot([], [], 'c-.', label='Yaw Rate Yaw')
         self.ax_yaw.set_title("Yaw Data Comparison")
         self.ax_yaw.set_xlabel("Time Step")
         self.ax_yaw.set_ylabel("Yaw (rad)")

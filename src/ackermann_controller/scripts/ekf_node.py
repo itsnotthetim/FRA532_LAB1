@@ -13,7 +13,7 @@ class EKFLocalization(Node):
         super().__init__('ekf_localization')
 
         # Subscribe to odometry and GPS
-        self.odom_sub = self.create_subscription(Odometry, '/double_track/odom', self.odom_callback, 10)
+        self.odom_sub = self.create_subscription(Odometry, '/yaw_rate/odom', self.odom_callback, 10)
         self.gps_sub = self.create_subscription(PoseStamped, '/gps', self.gps_callback, 10)
 
         # Publisher for fused odometry
