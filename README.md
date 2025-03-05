@@ -729,20 +729,26 @@ To run this controller, you can follow this command below:
 ros2 run ackermann_controller pid_controller.py
 ```
 
+These results perform by using Kp = 1.25, Ki = 0.0, and Kd = 0.0
+
 * Slow velocity (0.25 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/pid-0.25.png" alt="PID controller Result slow velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pid-0.25.png" alt="PID controller Result slow velocity" /></p>
 
-<p align="center"><img src="images/lab1.2/validation/pid-0.25-e.png" alt="PID controller Result slow velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pid-0.25-e.png" alt="PID controller Result slow velocity" /></p>
 
 * Fast velocity (0.5 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/pid-0.5.png" alt="PID controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pid-0.5.png" alt="PID controller Result fast velocity" /></p>
 
-<p align="center"><img src="images/lab1.2/validation/pid-0.5-e.png" alt="PID controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pid-0.5-e.png" alt="PID controller Result fast velocity" /></p>
+
+* Summarize:
+    * Position tracking: While tracking the position, this controller work well in slow velocity, observed from position error distribution graph slow velocity has more small error than fast velocity see at the frequency of error. Because this controller tracking the cross-track error if robot move so fast it can cross the path and slow to move back. So position error will increase from this reason.
+    * Yaw tracking: Same as position tracking, this controller also work well in slow velocity, observed from position error distribution graph slow velocity has more small error than fast velocity see at the frequency of error. Because this controller that we implemented didn't tracked the yaw from given path, it's only tracking the cross-track error. So it responds slowly, that made more error.
 
 > [!TIP]
-> Controller gains effected to the smoothness of path tracking, you can fine tune it to make this controller more smoother.
+> Controller gains effected to the smoothness of path tracking and reduced error while tracking the path, you can fine tune it to make this controller more smoother.
 
 ### 3 Pure Pursuit controller
 
@@ -800,17 +806,23 @@ To run this controller, you can follow this command below:
 ros2 run ackermann_controller pure_pursuit_controller.py
 ```
 
+These results perform by using lookahead distance = 0.3 m.
+
 * Slow velocity (0.25 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/pure-0.25.png" alt="Pure Pursuit controller Result slow velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pure-0.25.png" alt="Pure Pursuit controller Result slow velocity" /></p>
 
-<p align="center"><img src="images/lab1.2/validation/pure-0.25-e.png" alt="Pure Pursuit controller Result slow velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pure-0.25-e.png" alt="Pure Pursuit controller Result slow velocity" /></p>
 
 * Fast velocity (0.5 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/pure-0.5.png" alt="Pure Pursuit controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pure-0.5.png" alt="Pure Pursuit controller Result fast velocity" /></p>
 
-<p align="center"><img src="images/lab1.2/validation/pure-0.5-e.png" alt="Pure Pursuit controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pure-0.5-e.png" alt="Pure Pursuit controller Result fast velocity" /></p>
+
+* Summarize:
+    * Position tracking: This controller was tracking the path very well, observed from position error distribution graph, this graph show how many error that this controller made. See in those 2 graph(error distribution graph), Slow velocity made less error than fast velocity but just a few. Because this controller calculate from lookahead distance and turn it to be angular velocity(In formula it contains linear velocity), so it has small error and tracking position very well.
+    * Yaw tracking: Same as position tracking this controller was very well, but if you see in those 2 error graphs. When the reference path was change too much yaw, this controller has a lot of error. Because from characteristics of this controller it looking to the next point, if the point is so far, when robot faces the curve it's can miss the curve and go away from path because it's aiming at a point that isn't representative of the immediate curvature.
 
 > [!TIP]
 > Lookahead distance will effected to the smoothness of path tracking, you can adjusted this distance to change your robot path tracking characteristics.
@@ -885,22 +897,34 @@ To run this controller, you can follow this command below:
 ros2 run ackermann_controller 
 ```
 
+These results perform by using K = 2.0
+
 * Slow velocity (0.25 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/stan-0.25.png" alt="Stanley controller Result slow velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/stan-0.25.png" alt="Stanley controller Result slow velocity" /></p>
 
-<p align="center"><img src="images/lab1.2/validation/stan-0.25-e.png" alt="Stanley controller Result slow velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/stan-0.25-e.png" alt="Stanley controller Result slow velocity" /></p>
 
 * Fast velocity (0.5 m/s)
 
-<p align="center"><img src="images/lab1.2/validation/stan-0.5.png" alt="Stanley controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/stan-0.5.png" alt="Stanley controller Result fast velocity" /></p>
 
-<p align="center"><img src="images/lab1.2/validation/stan-0.5-e.png" alt="Stanley controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/stan-0.5-e.png" alt="Stanley controller Result fast velocity" /></p>
+
+* Summarize:
+    * Position tracking: This controller performs good in position tracking, see in position error distribution graphs. You can see the error of it, that very low. But velocity of robot effected to the position tracking, observed at position error graph of slow velocity. You can see the error very sensitive, the distribution of errors is quite large. Because in the formula of this controller has the division by the vehicle's speed means that the controller’s performance can be sensitive at very low speeds.
+    * Yaw tracking: Same as position tracking in term of error distribution, this controller show the distribution of errors, that is quite large in slow velocity. But in fast velocity, it's work very well to tracking the path. Because this controller get 2 errors to compute that are cross-track error and yaw error. So robot can tracking that path more accurate but not too smooth.
 
 > [!TIP]
 > The choice of $k$ is crucial for balancing responsiveness and stability. An improper value may lead to oscillations or poor tracking performance.
 
 ### 5 Conclusion
+
+From all results of path tracking controller testing. we summarize how to selected the controller following:
+
+1. **PID controller:** If you want the controller that easy to implement and path is not complex. Additionally, you can turn this controller into cascade pid controller to control more one variable, that can make your controller more smooter or reduce the error while tracking the path.
+2. **Pure Pursuit controller:** If you want the controller that is quite smooth and the path is not complex. Additionally, This controller work well if the path has a lot of straight way. You need to tune the lookahead distance for the best result for your work.
+3. **Stanley controller:** If you want the controller that have small error while tracking the path(position and yaw), this controller will served your want. Because this controller work well to tracking the path witl small error but it's very sensitive with slow velocity. You need to tune the k gain because it's may lead to poor tracking performance.
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
