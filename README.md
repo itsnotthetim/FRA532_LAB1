@@ -571,18 +571,16 @@ The results for each model are shown in the following graphs below:
 
 ### 5 Conclusion
 
-
-
-**Model selection guide**
+From all results of inverse and forward kinematic models testing. we summarize how to selected the controller following:
 
 - **Inverse Kinematics**  
-  - **Bicycle Model**: Best for simple path-following and control.  
-  - **No-Slip Model**: Best for precise low-speed maneuvers.  
+  1. **Bicycle Model**: Best for simple path-following and control.  
+  2. **No-Slip Model**: Best for precise low-speed.  
 
 - **Forward Kinematics**  
-  - **Yaw-Rate Model**: Easy to implement; works well with IMU.  
-  - **Single-Track Model**: More accurate for steering-based motion.
-  - **Double-Track Model**: Best for high-speed and complex dynamics.
+  1. **Yaw-Rate Model**: Easy to implement; works well with IMU.  
+  2. **Single-Track Model**: More accurate for steering-based motion.
+  3. **Double-Track Model**: Best for high-speed and complex dynamics.
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
@@ -599,7 +597,9 @@ To select the controllers that given by instruction(PID, Pure Pursuit, Linear MP
 3. How difficult is it to implement?
 
 > [!NOTE]
-> To test the controller we use <a href="#21-bicycle-model">bicycle model</a> and ground truth odometry to be our inverse and forward kinematics model.
+> To test the controller we use <a href="#21-bicycle-model">bicycle model</a> and ground truth odometry to be our inverse and forward kinematics model. To compare and validate the result, we have to analyze as follows:
+> 1. Position.
+> 2. Orientation.
 
 ### 2 PID controller
 
