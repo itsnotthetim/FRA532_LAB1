@@ -16,7 +16,7 @@ class AckermannFKWheelOdometry(Node):
         super().__init__('ackermann_fk_wheel_odometry', namespace='')
       
         # Declare parameters
-        self.dt = 0.02
+        self.dt = 0.04
         self.declare_parameter('wheelbase', 0.2)  # Distance between front and rear axles
         self.declare_parameter('track_width', 0.14)  # Distance between left and right wheels
         self.declare_parameter('wheel_radius', 0.045)  # Radius of the wheels

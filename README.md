@@ -65,6 +65,8 @@ This project is in FRA532(Mobile Robotics) class at **FIBO** that teach about Mo
 
 ### System Architecture
 
+<p align="center"><img src="images/introduction/system diagram.png" alt="System architecture" /></p>
+
 <!-- GETTING STARTED -->
 ## Getting Started
 
