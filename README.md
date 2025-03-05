@@ -541,6 +541,11 @@ The results for each model are shown in the following graphs below:
 
         <p align="center"><img src="images/lab1.1/validation/Bicycle-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
 
+    * Summarize:
+        * **Bicycle Model:** This model is work well at slow speed, see in error distribution graphs. Additionally, the results are good, the path that calculate form this model is very close to ground truth. That mean this model is can use to be the inverse kinematics model of our robot.
+        * **Double-Track Model:** This model is work well at slow speed, see in error distribution graphs. Error from high speed show there are more error than slow speed. But this model work well at yaw, see in error from slow and high speed, The results are not very different.
+        * **Single-Track Model:** This model has characteristics like yaw-rate model, see in path tracking and error distribution graphs. But this model isn't work well at high speed. Observed at path tracking you can see the result slowly move away from ground truth. Additionally, you can see in error graphs. At high speed position tracking error has more that slow speed so much including yaw.
+        * **Yaw-Rate Model:** This model error in position calculation more than other model, see in error distribution graphs. It has a lot of error, but this model is work well at yaw calculation. Error at this variable is very low both in slow and high speed. Because of this model based on imu data that contains yaw value.
         ---
 
 2. No-Slip Condition Model
@@ -566,6 +571,12 @@ The results for each model are shown in the following graphs below:
         <p align="center"><img src="images/lab1.1/validation/no-slip-0.5-pos-error-kine-validate.png" alt="Double track image" /></p>
 
         <p align="center"><img src="images/lab1.1/validation/no-slip-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
+
+    * Summarize:
+        * **No-Slip Model:** This model is work well at slow speed, see in error distribution graphs. Additionally, the results are good, the path that calculate form this model is very close to ground truth. That mean this model is can use to be the inverse kinematics model of our robot.
+        * **Double-Track Model:** This model is work well at slow speed, see in error distribution graphs. Error from high speed show there are more error than slow speed. But this model work well at yaw, see in error from slow and high speed, The results are not very different.
+        * **Single-Track Model:** This model has characteristics like yaw-rate model, see in path tracking and error distribution graphs. But this model isn't work well at high speed. Observed at path tracking you can see the result slowly move away from ground truth. Additionally, you can see in error graphs. At high speed position tracking error has more that slow speed so much including yaw.
+        * **Yaw-Rate Model:** This model error in position calculation more than other model, see in error distribution graphs. It has a lot of error, but this model is work well at yaw calculation. Error at this variable is very low both in slow and high speed. Because of this model based on imu data that contains yaw value.
 
         ---
 
@@ -737,15 +748,15 @@ These results perform by using Kp = 1.25, Ki = 0.0, and Kd = 0.0
 
     <p align="center"><img src="images/lab1.2/validation/pid-0.25-e.png" alt="PID controller Result slow velocity" /></p>
 
-* Fast velocity (0.5 m/s)
+* high velocity (0.5 m/s)
 
-    <p align="center"><img src="images/lab1.2/validation/pid-0.5.png" alt="PID controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pid-0.5.png" alt="PID controller Result high velocity" /></p>
 
-    <p align="center"><img src="images/lab1.2/validation/pid-0.5-e.png" alt="PID controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pid-0.5-e.png" alt="PID controller Result high velocity" /></p>
 
 * Summarize:
-    * Position tracking: While tracking the position, this controller work well in slow velocity, observed from position error distribution graph slow velocity has more small error than fast velocity see at the frequency of error. Because this controller tracking the cross-track error if robot move so fast it can cross the path and slow to move back. So position error will increase from this reason.
-    * Yaw tracking: Same as position tracking, this controller also work well in slow velocity, observed from position error distribution graph slow velocity has more small error than fast velocity see at the frequency of error. Because this controller that we implemented didn't tracked the yaw from given path, it's only tracking the cross-track error. So it responds slowly, that made more error.
+    * Position tracking: While tracking the position, this controller work well in slow velocity, observed from position error distribution graph slow velocity has more small error than high velocity see at the frequency of error. Because this controller tracking the cross-track error if robot move so fast it can cross the path and slow to move back. So position error will increase from this reason.
+    * Yaw tracking: Same as position tracking, this controller also work well in slow velocity, observed from position error distribution graph slow velocity has more small error than high velocity see at the frequency of error. Because this controller that we implemented didn't tracked the yaw from given path, it's only tracking the cross-track error. So it responds slowly, that made more error.
 
 > [!TIP]
 > Controller gains effected to the smoothness of path tracking and reduced error while tracking the path, you can fine tune it to make this controller more smoother.
@@ -814,14 +825,14 @@ These results perform by using lookahead distance = 0.3 m.
 
     <p align="center"><img src="images/lab1.2/validation/pure-0.25-e.png" alt="Pure Pursuit controller Result slow velocity" /></p>
 
-* Fast velocity (0.5 m/s)
+* high velocity (0.5 m/s)
 
-    <p align="center"><img src="images/lab1.2/validation/pure-0.5.png" alt="Pure Pursuit controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pure-0.5.png" alt="Pure Pursuit controller Result high velocity" /></p>
 
-    <p align="center"><img src="images/lab1.2/validation/pure-0.5-e.png" alt="Pure Pursuit controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/pure-0.5-e.png" alt="Pure Pursuit controller Result high velocity" /></p>
 
 * Summarize:
-    * Position tracking: This controller was tracking the path very well, observed from position error distribution graph, this graph show how many error that this controller made. See in those 2 graph(error distribution graph), Slow velocity made less error than fast velocity but just a few. Because this controller calculate from lookahead distance and turn it to be angular velocity(In formula it contains linear velocity), so it has small error and tracking position very well.
+    * Position tracking: This controller was tracking the path very well, observed from position error distribution graph, this graph show how many error that this controller made. See in those 2 graph(error distribution graph), Slow velocity made less error than high velocity but just a few. Because this controller calculate from lookahead distance and turn it to be angular velocity(In formula it contains linear velocity), so it has small error and tracking position very well.
     * Yaw tracking: Same as position tracking this controller was very well, but if you see in those 2 error graphs. When the reference path was change too much yaw, this controller has a lot of error. Because from characteristics of this controller it looking to the next point, if the point is so far, when robot faces the curve it's can miss the curve and go away from path because it's aiming at a point that isn't representative of the immediate curvature.
 
 > [!TIP]
@@ -905,15 +916,15 @@ These results perform by using K = 2.0
 
     <p align="center"><img src="images/lab1.2/validation/stan-0.25-e.png" alt="Stanley controller Result slow velocity" /></p>
 
-* Fast velocity (0.5 m/s)
+* high velocity (0.5 m/s)
 
-    <p align="center"><img src="images/lab1.2/validation/stan-0.5.png" alt="Stanley controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/stan-0.5.png" alt="Stanley controller Result high velocity" /></p>
 
-    <p align="center"><img src="images/lab1.2/validation/stan-0.5-e.png" alt="Stanley controller Result fast velocity" /></p>
+    <p align="center"><img src="images/lab1.2/validation/stan-0.5-e.png" alt="Stanley controller Result high velocity" /></p>
 
 * Summarize:
     * Position tracking: This controller performs good in position tracking, see in position error distribution graphs. You can see the error of it, that very low. But velocity of robot effected to the position tracking, observed at position error graph of slow velocity. You can see the error very sensitive, the distribution of errors is quite large. Because in the formula of this controller has the division by the vehicle's speed means that the controller’s performance can be sensitive at very low speeds.
-    * Yaw tracking: Same as position tracking in term of error distribution, this controller show the distribution of errors, that is quite large in slow velocity. But in fast velocity, it's work very well to tracking the path. Because this controller get 2 errors to compute that are cross-track error and yaw error. So robot can tracking that path more accurate but not too smooth.
+    * Yaw tracking: Same as position tracking in term of error distribution, this controller show the distribution of errors, that is quite large in slow velocity. But in high velocity, it's work very well to tracking the path. Because this controller get 2 errors to compute that are cross-track error and yaw error. So robot can tracking that path more accurate but not too smooth.
 
 > [!TIP]
 > The choice of $k$ is crucial for balancing responsiveness and stability. An improper value may lead to oscillations or poor tracking performance.
