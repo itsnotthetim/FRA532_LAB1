@@ -543,9 +543,10 @@ The results for each model are shown in the following graphs below:
 
     * Summarize:
         * **Bicycle Model:** This model is work well at slow speed, see in error distribution graphs. Additionally, the results are good, the path that calculate form this model is very close to ground truth. That mean this model is can use to be the inverse kinematics model of our robot.
+        * **Single-Track Model:** This model has characteristics like double-track model, see in path tracking and error distribution graphs. But this model isn't work well at high speed. Observed at path tracking you can see the result slowly move away from ground truth. Additionally, you can see in error graphs. At high speed position tracking error has more that slow speed so much including yaw.
         * **Double-Track Model:** This model is work well at slow speed, see in error distribution graphs. Error from high speed show there are more error than slow speed. But this model work well at yaw, see in error from slow and high speed, The results are not very different.
-        * **Single-Track Model:** This model has characteristics like yaw-rate model, see in path tracking and error distribution graphs. But this model isn't work well at high speed. Observed at path tracking you can see the result slowly move away from ground truth. Additionally, you can see in error graphs. At high speed position tracking error has more that slow speed so much including yaw.
         * **Yaw-Rate Model:** This model error in position calculation more than other model, see in error distribution graphs. It has a lot of error, but this model is work well at yaw calculation. Error at this variable is very low both in slow and high speed. Because of this model based on imu data that contains yaw value.
+        
         ---
 
 2. No-Slip Condition Model
@@ -560,8 +561,6 @@ The results for each model are shown in the following graphs below:
 
         <p align="center"><img src="images/lab1.1/validation/no-slip-0.25-orient-error-kine-validate.png" alt="Double track image" /></p>
 
-        ---
-
     * Path tracking velocity = 0.5 m/s
 
         <p align="center"><img src="images/lab1.1/validation/no-slip-0.5-pos-kine-validate.png" alt="Double track image" /></p>
@@ -573,10 +572,10 @@ The results for each model are shown in the following graphs below:
         <p align="center"><img src="images/lab1.1/validation/no-slip-0.5-orient-error-kine-validate.png" alt="Double track image" /></p>
 
     * Summarize:
-        * **No-Slip Model:** This model is work well at slow speed, see in error distribution graphs. Additionally, the results are good, the path that calculate form this model is very close to ground truth. That mean this model is can use to be the inverse kinematics model of our robot.
-        * **Double-Track Model:** This model is work well at slow speed, see in error distribution graphs. Error from high speed show there are more error than slow speed. But this model work well at yaw, see in error from slow and high speed, The results are not very different.
-        * **Single-Track Model:** This model has characteristics like yaw-rate model, see in path tracking and error distribution graphs. But this model isn't work well at high speed. Observed at path tracking you can see the result slowly move away from ground truth. Additionally, you can see in error graphs. At high speed position tracking error has more that slow speed so much including yaw.
-        * **Yaw-Rate Model:** This model error in position calculation more than other model, see in error distribution graphs. It has a lot of error, but this model is work well at yaw calculation. Error at this variable is very low both in slow and high speed. Because of this model based on imu data that contains yaw value.
+        * **No-Slip Model:** This model is work well at slow speed, see in position tracking. You can easily see that path that calculate from this model was shift after pass a few times. Additionally, you can see in the error distribution graphs. If we increase the speed error has increase also and so much.
+        * **Single-Track Model:** Same as using bicycle model, work well in slow speed. But when using no-slip model, position calculation has more accurate than using bicycle model(Only slow speed).
+        * **Double-Track Model:** Same as using bicycle model, work well in slow speed. But when using no-slip model, position calculation has more accurate than using bicycle model(Only slow speed).
+        * **Yaw-Rate Model:** Same as using bicycle model, work well in slow speed and calculate yaw data.
 
         ---
 
@@ -585,13 +584,13 @@ The results for each model are shown in the following graphs below:
 From all results of inverse and forward kinematic models testing. we summarize how to selected the controller following:
 
 - **Inverse Kinematics**  
-  1. **Bicycle Model**: Best for simple path-following and control.  
-  2. **No-Slip Model**: Best for precise low-speed.  
+  1. **Bicycle Model**: Best for simple path-following and control. Can use with low and high speed.
+  2. **No-Slip Model**: Best for precise low-speed. Too much error at high speed.
 
 - **Forward Kinematics**  
   1. **Yaw-Rate Model**: Easy to implement; works well with IMU.  
-  2. **Single-Track Model**: More accurate for steering-based motion.
-  3. **Double-Track Model**: Best for high-speed and complex dynamics.
+  2. **Single-Track Model**: Characteristics similar to yaw rate but didn't need to use IMU.
+  3. **Double-Track Model**: Best for high-speed(Yaw calculation) but position calculation may not good at high-speed.
 
 <p align="right">(<a href="#fra532-lab1">back to top</a>)</p>
 
